@@ -15,18 +15,22 @@ const LIQUID = {
 };
 
 const PRODUCTS = [
-  {id:'noor', name:'Noor', notes:'White florals · Musk', price:7200,
-   desc:'A luminous white-floral built around jasmine and clean musk, warmed with a whisper of amber. Soft, confident, and easy to wear from morning to evening.'},
-  {id:'zaroud', name:'Zar-e-Oud', notes:'Oud · Amber', price:8900,
-   desc:'Our signature oud — deep, resinous and smoky, rounded out with warm amber and a touch of spice. Bold enough for winter evenings, refined enough for daily wear.'},
-  {id:'gulnar', name:'Gulnar', notes:'Rose · Saffron', price:8200,
-   desc:'A modern take on rose, brightened with saffron and a soft powdery base. Romantic without being heavy — the kind of rose that lingers on a scarf.'},
-  {id:'shab', name:'Shab', notes:'Dark vanilla · Tonka', price:7800,
-   desc:'Dark vanilla and tonka bean, wrapped in a soft gourmand base. Cosy, sensual, and built to last long after the sun goes down — the name means "night".'},
-  {id:'ambergris', name:'Ambergris Nuit', notes:'Amber · Leather', price:9500,
-   desc:'Amber and supple leather sit at the heart of this one, with a smoky base that develops for hours. Our richest, most enduring composition.'},
-  {id:'citrine', name:'Citrine Bloom', notes:'Citrus · Jasmine', price:6900,
-   desc:'Bright citrus opens into a heart of jasmine and light musk. An everyday scent that feels sunny without ever tipping into sweet.'},
+  {id:'noir', name:'Noir', notes:'Oud · Amber · Spice', price:8900, image:'assets/products/noir.jpg',
+   desc:'Our darkest, most commanding scent. Smoky oud and warm amber wrapped in a spiced base — bold enough for winter nights, refined enough for daily wear.'},
+  {id:'blanc', name:'Blanc', notes:'White Florals · Musk', price:7200, image:'assets/products/blanc.jpg',
+   desc:'A luminous white-floral built around jasmine and clean musk. Soft, confident, and easy to wear from morning to evening.'},
+  {id:'ocean', name:'Ocean', notes:'Marine · Citrus · Ambergris', price:7800, image:'assets/products/ocean.jpg',
+   desc:'Fresh marine notes over bright citrus, settling into a soft ambergris base. Our most refreshing scent — built for warm days.'},
+  {id:'rouge', name:'Rouge', notes:'Rose · Berries · Spice', price:8200, image:'assets/products/rouge.jpg',
+   desc:'Deep rose and dark berries warmed with a touch of spice. Romantic and rich — the kind of scent that lingers on a scarf.'},
+  {id:'vert', name:'Vert', notes:'Green Notes · Fig · Vetiver', price:7500, image:'assets/products/vert.jpg',
+   desc:'Crisp green notes and fig, grounded in earthy vetiver. Clean, natural, and quietly confident — our take on a modern green scent.'},
+  {id:'amber', name:'Amber', notes:'Amber · Vanilla · Woods', price:8500, image:'assets/products/amber.jpg',
+   desc:'Warm amber and soft vanilla over a woody base. Cosy and enveloping — built to last long after the sun goes down.'},
+  {id:'fleur', name:'Fleur', notes:'Peony · Pink Florals · Musk', price:7400, image:'assets/products/fleur.jpg',
+   desc:'Soft peony and pink florals over a gentle musk base. Light, romantic, and effortless — an everyday floral that never feels heavy.'},
+  {id:'elegance', name:'Élégance', notes:'Iris · White Musk · Woods', price:9200, image:'assets/products/elegance.jpg',
+   desc:'Powdery iris and clean white musk over refined woods. Understated and sophisticated — our most versatile, unisex composition.'},
 ];
 
 const INSPIRED = [
@@ -61,13 +65,19 @@ function getProductById(id){
   styleTag.textContent = rules;
 })();
 
+function bottleVisualHTML(p){
+  if(p.image){
+    return `<div class="bottle-wrap photo-wrap"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>`;
+  }
+  return `<div class="bottle-wrap liquid-${p.id}"><svg viewBox="0 0 120 240"><use href="#bottle-shape"/></svg></div>`;
+}
+
 function renderProductCard(p, container, linkToDetail){
   const card = document.createElement('div');
   card.className = 'product-card reveal';
+  const visual = bottleVisualHTML(p);
   const inner = `
-    <div class="bottle-wrap liquid-${p.id}">
-      <svg viewBox="0 0 120 240"><use href="#bottle-shape"/></svg>
-    </div>
+    ${visual}
     ${p.inspiredBy ? `<div class="inspired-tag">Inspired by ${p.inspiredBy}</div>` : ''}
     <h3>${p.name}</h3>
     <div class="notes">${p.notes}</div>
@@ -76,9 +86,7 @@ function renderProductCard(p, container, linkToDetail){
   `;
   if(linkToDetail){
     card.innerHTML = `<a href="product.html?id=${p.id}" style="display:block; color:inherit;">
-      <div class="bottle-wrap liquid-${p.id}">
-        <svg viewBox="0 0 120 240"><use href="#bottle-shape"/></svg>
-      </div>
+      ${visual}
       ${p.inspiredBy ? `<div class="inspired-tag">Inspired by ${p.inspiredBy}</div>` : ''}
       <h3>${p.name}</h3>
       <div class="notes">${p.notes}</div>

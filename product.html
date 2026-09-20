@@ -55,8 +55,10 @@
     root.innerHTML = `
       <div class="product-detail">
         <div class="product-detail-visual">
-          <div class="glow"></div>
-          <svg class="liquid-${product.id}" viewBox="0 0 120 240"><use href="#bottle-shape"/></svg>
+          ${product.image ? '' : '<div class="glow"></div>'}
+          ${product.image
+            ? `<img src="${product.image}" alt="${product.name}" class="detail-photo">`
+            : `<svg class="liquid-${product.id}" viewBox="0 0 120 240"><use href="#bottle-shape"/></svg>`}
         </div>
         <div class="product-detail-info">
           <div class="crumb"><a href="index.html">Home</a> / <a href="${collectionHref}">${collectionLabel}</a> / ${product.name}</div>

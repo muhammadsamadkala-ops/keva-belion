@@ -58,7 +58,7 @@ function renderCart(){
   } else {
     wrap.innerHTML = cart.map(i=>`
       <div class="cart-item">
-        <div class="bwrap liquid-${i.id}"><svg viewBox="0 0 120 240"><use href="#bottle-shape"/></svg></div>
+        <div class="bwrap ${i.image ? 'photo-wrap' : 'liquid-'+i.id}">${i.image ? `<img src="${i.image}" alt="${i.name}">` : `<svg viewBox="0 0 120 240"><use href="#bottle-shape"/></svg>`}</div>
         <div class="cart-item-info">
           <h5>${i.name}</h5>
           <div class="p">PKR ${(i.price*i.qty).toLocaleString()}</div>
@@ -113,6 +113,7 @@ const modalBox = document.getElementById('modalBox');
 
 function checkoutFormHTML(){
   return `
+    <button type="button" class="modal-close-btn" id="checkoutCloseBtn" aria-label="Close checkout">&times;</button>
     <h3>Checkout</h3>
     <div class="sub">${cart.length} item${cart.length!==1?'s':''} · PKR ${cartTotal().toLocaleString()}</div>
     <form id="checkoutForm">
@@ -136,14 +137,27 @@ function checkoutFormHTML(){
         <label>Payment method</label>
         <div class="pay-options">
           <div class="pay-option active" data-method="cod">Cash on Delivery</div>
-          <div class="pay-option" data-method="bank">Bank Transfer</div>
+          <div class="pay-option" data-method="card">Debit / Credit Card</div>
         </div>
-        <div class="bank-details" id="bankDetails">
-          <div><b>Bank:</b> Meezan Bank</div>
-          <div><b>Account title:</b> Kiva Belion</div>
-          <div><b>Account number:</b> 0123 4567 8901</div>
-          <div><b>IBAN:</b> PK00 MEZN 0000 0123 4567 8901</div>
-          <div>Please send payment screenshot on WhatsApp after checkout.</div>
+        <div class="bank-details" id="cardDetails">
+          <div class="field" style="margin-bottom:12px;">
+            <label for="cardNumber">Card number</label>
+            <input type="text" id="cardNumber" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456">
+          </div>
+          <div style="display:flex; gap:12px;">
+            <div class="field" style="flex:1; margin-bottom:12px;">
+              <label for="cardExpiry">Expiry</label>
+              <input type="text" id="cardExpiry" maxlength="5" placeholder="MM/YY">
+            </div>
+            <div class="field" style="flex:1; margin-bottom:12px;">
+              <label for="cardCvv">CVV</label>
+              <input type="text" id="cardCvv" inputmode="numeric" maxlength="4" placeholder="123">
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0;">
+            <label for="cardName">Name on card</label>
+            <input type="text" id="cardName" placeholder="As shown on card">
+          </div>
         </div>
       </div>
       <button type="submit" class="btn btn-primary modal-submit">Place order</button>
@@ -157,35 +171,62 @@ function openCheckout(){
   checkoutModal.classList.add('show');
   overlay.classList.add('show');
 
+  modalBox.querySelector('#checkoutCloseBtn').addEventListener('click', closeCheckout);
+
   const options = modalBox.querySelectorAll('.pay-option');
-  const bankDetails = modalBox.querySelector('#bankDetails');
+  const cardDetails = modalBox.querySelector('#cardDetails');
   let method = 'cod';
   options.forEach(opt=>{
     opt.addEventListener('click', ()=>{
       options.forEach(o=>o.classList.remove('active'));
       opt.classList.add('active');
       method = opt.dataset.method;
-      bankDetails.classList.toggle('show', method==='bank');
+      cardDetails.classList.toggle('show', method==='card');
+      cardDetails.querySelectorAll('input').forEach(inp=>{ inp.required = (method==='card'); });
     });
   });
+
+  // light auto-formatting for card fields
+  const cardNumberEl = modalBox.querySelector('#cardNumber');
+  if(cardNumberEl){
+    cardNumberEl.addEventListener('input', ()=>{
+      cardNumberEl.value = cardNumberEl.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
+    });
+  }
+  const cardExpiryEl = modalBox.querySelector('#cardExpiry');
+  if(cardExpiryEl){
+    cardExpiryEl.addEventListener('input', ()=>{
+      let v = cardExpiryEl.value.replace(/\D/g,'').slice(0,4);
+      if(v.length>=3) v = v.slice(0,2) + '/' + v.slice(2);
+      cardExpiryEl.value = v;
+    });
+  }
+  const cardCvvEl = modalBox.querySelector('#cardCvv');
+  if(cardCvvEl){
+    cardCvvEl.addEventListener('input', ()=>{
+      cardCvvEl.value = cardCvvEl.value.replace(/\D/g,'').slice(0,4);
+    });
+  }
 
   modalBox.querySelector('#checkoutForm').addEventListener('submit', e=>{
     e.preventDefault();
     const orderId = 'KB-' + Math.floor(100000 + Math.random()*900000);
     const total = cartTotal();
     modalBox.innerHTML = `
+      <button type="button" class="modal-close-btn" id="checkoutCloseBtn2" aria-label="Close">&times;</button>
       <div class="order-confirm">
         <div class="check-circle">✓</div>
         <h3>Order placed</h3>
         <p>Thank you — your order <span class="oid">${orderId}</span> has been received.</p>
         <p>Total: <strong style="color:var(--gold-bright)">PKR ${total.toLocaleString()}</strong></p>
-        <p style="margin-top:14px;">${method==='cod' ? "We'll call you shortly to confirm your Cash on Delivery order." : "Please send your payment screenshot on WhatsApp to confirm your order."}</p>
+        <p style="margin-top:14px;">${method==='cod' ? "We'll call you shortly to confirm your Cash on Delivery order." : "Your card payment is being verified — you'll receive a confirmation shortly."}</p>
         <button class="btn btn-ghost" style="margin-top:22px;" id="closeConfirm">Continue shopping</button>
       </div>
     `;
     cart = [];
     renderCart();
     modalBox.querySelector('#closeConfirm').addEventListener('click', closeCheckout);
+    modalBox.querySelector('#checkoutCloseBtn2').addEventListener('click', closeCheckout);
   });
 }
 function closeCheckout(){
