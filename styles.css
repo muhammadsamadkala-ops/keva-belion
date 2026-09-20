@@ -237,11 +237,11 @@
   @media (max-width:900px){ .cursor-glow{display:none;} }
   .hero-bottles{position:absolute; inset:0; z-index:1; pointer-events:none;}
   .float-bottle{position:absolute; opacity:.9;}
-  .float-bottle svg{width:100%; height:100%;}
+  .float-bottle img{width:100%; height:auto; display:block; border-radius:10px; box-shadow:0 10px 24px rgba(0,0,0,.25);}
   .fb1{width:92px; top:14%; left:10%; filter:drop-shadow(0 14px 22px rgba(120,95,55,.28)); animation:float-a 7s ease-in-out infinite;}
-  .fb2{width:64px; top:58%; left:6%; opacity:.55; filter:blur(.4px) drop-shadow(0 10px 16px rgba(120,95,55,.22)); animation:float-b 8.5s ease-in-out infinite; animation-delay:.6s;}
+  .fb2{width:64px; top:58%; left:6%; opacity:.65; filter:blur(.4px) drop-shadow(0 10px 16px rgba(120,95,55,.22)); animation:float-b 8.5s ease-in-out infinite; animation-delay:.6s;}
   .fb3{width:104px; top:10%; right:9%; filter:drop-shadow(0 16px 24px rgba(120,95,55,.28)); animation:float-b 7.8s ease-in-out infinite; animation-delay:.3s;}
-  .fb4{width:58px; top:62%; right:13%; opacity:.5; filter:blur(.4px) drop-shadow(0 10px 14px rgba(120,95,55,.2)); animation:float-a 9s ease-in-out infinite; animation-delay:1.1s;}
+  .fb4{width:58px; top:62%; right:13%; opacity:.6; filter:blur(.4px) drop-shadow(0 10px 14px rgba(120,95,55,.2)); animation:float-a 9s ease-in-out infinite; animation-delay:1.1s;}
 
   @keyframes float-a{
     0%,100%{transform:translateY(0) rotate(0deg);}
@@ -302,6 +302,7 @@
   }
   @media (prefers-reduced-motion: reduce){ .about-visual-glow{animation:none;} }
   .about-visual svg{width:190px; position:relative; z-index:1; filter:drop-shadow(0 20px 40px rgba(201,161,90,.3));}
+  .about-visual img{width:220px; height:auto; border-radius:16px; position:relative; z-index:1; box-shadow:0 20px 46px rgba(120,95,55,.3);}
 
   /* ---------- COLLECTION ---------- */
   .collection{padding:110px 28px;}
@@ -380,14 +381,16 @@
   .stage-visual{position:relative; height:160px; margin-bottom:6px;}
   .stage-bottle{
     position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-    width:34px; height:68px; z-index:2;
-    filter:drop-shadow(0 8px 14px rgba(120,95,55,.25));
+    width:58px; height:78px; z-index:2;
+    border-radius:8px; overflow:hidden;
+    box-shadow:0 8px 14px rgba(120,95,55,.3);
   }
   .stage-bottle svg{width:100%; height:100%;}
+  .stage-bottle img{width:100%; height:100%; object-fit:cover; display:block;}
 
   /* Top notes: rising, dispersing particles from bottle neck */
   .sv-top i{
-    position:absolute; bottom:66px; left:50%; width:5px; height:5px; border-radius:50%;
+    position:absolute; bottom:76px; left:50%; width:5px; height:5px; border-radius:50%;
     background:var(--gold-bright);
     box-shadow:0 0 8px rgba(184,137,74,.7);
     opacity:0; z-index:1;
@@ -401,14 +404,14 @@
 
   /* Heart notes: blooming concentric rings above the bottle */
   .sv-heart .ring{
-    position:absolute; bottom:64px; left:50%; transform:translateX(-50%);
+    position:absolute; bottom:74px; left:50%; transform:translateX(-50%);
     border:1px solid var(--gold);
     border-radius:50%; width:14px; height:14px;
     opacity:0; z-index:1;
     animation:bloom 3.6s ease-out infinite;
   }
   .sv-heart .core{
-    position:absolute; bottom:60px; left:50%; transform:translateX(-50%);
+    position:absolute; bottom:70px; left:50%; transform:translateX(-50%);
     width:10px; height:10px; border-radius:50%;
     background:var(--gold-bright); z-index:1;
     box-shadow:0 0 14px rgba(184,137,74,.8);

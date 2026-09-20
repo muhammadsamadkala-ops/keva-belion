@@ -1,13 +1,5 @@
 /* ============ SHARED APP BEHAVIOR (nav, cart, checkout, effects) ============ */
 
-// also tag hero/about bottles with a liquid class for variety, if present on this page
-document.querySelectorAll('.float-bottle').forEach((el,i)=>{
-  const keys = Object.keys(LIQUID);
-  el.classList.add('liquid-'+keys[i % keys.length]);
-});
-const aboutVisual = document.querySelector('.about-visual');
-if(aboutVisual) aboutVisual.classList.add('liquid-ambergris');
-
 // carousel arrow scrolling (home page)
 document.querySelectorAll('.carousel-arrow').forEach(btn=>{
   btn.addEventListener('click', ()=>{
