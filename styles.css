@@ -98,6 +98,12 @@
     overflow:hidden;
   }
   .hero{background:radial-gradient(ellipse 130% 65% at 50% 0%, #fdf9f2 0%, var(--bg) 62%); isolation:isolate;}
+  .hero-video-wrap{position:absolute; inset:0; z-index:-1; overflow:hidden;}
+  .hero-video-wrap video{width:100%; height:100%; object-fit:cover; display:block;}
+  .hero-video-overlay{
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(8,8,6,.6) 0%, rgba(8,8,6,.42) 45%, var(--bg) 96%);
+  }
   .aurora{position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0;}
   .vignette{display:none;}
   .grain{
@@ -202,6 +208,21 @@
     color:var(--text-muted);
     font-size:16.5px;
   }
+
+  /* Hero-with-video text treatment: light text over the dark video/overlay */
+  .hero-video-active .hero h1{color:#faf6ec;}
+  .hero-video-active .hero p.lede{color:rgba(250,246,236,.82);}
+  .hero-video-active .eyebrow-pill{
+    color:rgba(250,246,236,.9);
+    border-color:rgba(250,246,236,.3);
+    background:rgba(255,255,255,.1);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+  }
+  .hero-video-active .btn-ghost{
+    border-color:rgba(250,246,236,.45); color:#faf6ec;
+  }
+  .hero-video-active .btn-ghost:hover{border-color:var(--gold-bright); color:var(--gold-bright);}
   .hero-ctas{
     margin-top:38px;
     display:flex; gap:16px; justify-content:center; flex-wrap:wrap;
@@ -378,19 +399,19 @@
   .journey-stage h3{font-family:var(--serif); font-weight:500; font-size:1.35rem; margin-bottom:10px;}
   .journey-stage p{color:var(--text-muted); font-size:14px; margin-bottom:24px;}
 
-  .stage-visual{position:relative; height:160px; margin-bottom:6px;}
+  .stage-visual{position:relative; height:200px; margin-bottom:6px;}
   .stage-bottle{
     position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-    width:58px; height:78px; z-index:2;
-    border-radius:8px; overflow:hidden;
-    box-shadow:0 8px 14px rgba(120,95,55,.3);
+    width:88px; height:118px; z-index:2;
+    border-radius:10px; overflow:hidden;
+    box-shadow:0 10px 20px rgba(120,95,55,.32);
   }
   .stage-bottle svg{width:100%; height:100%;}
   .stage-bottle img{width:100%; height:100%; object-fit:cover; display:block;}
 
   /* Top notes: rising, dispersing particles from bottle neck */
   .sv-top i{
-    position:absolute; bottom:76px; left:50%; width:5px; height:5px; border-radius:50%;
+    position:absolute; bottom:112px; left:50%; width:5px; height:5px; border-radius:50%;
     background:var(--gold-bright);
     box-shadow:0 0 8px rgba(184,137,74,.7);
     opacity:0; z-index:1;
@@ -404,14 +425,14 @@
 
   /* Heart notes: blooming concentric rings above the bottle */
   .sv-heart .ring{
-    position:absolute; bottom:74px; left:50%; transform:translateX(-50%);
+    position:absolute; bottom:110px; left:50%; transform:translateX(-50%);
     border:1px solid var(--gold);
     border-radius:50%; width:14px; height:14px;
     opacity:0; z-index:1;
     animation:bloom 3.6s ease-out infinite;
   }
   .sv-heart .core{
-    position:absolute; bottom:70px; left:50%; transform:translateX(-50%);
+    position:absolute; bottom:104px; left:50%; transform:translateX(-50%);
     width:10px; height:10px; border-radius:50%;
     background:var(--gold-bright); z-index:1;
     box-shadow:0 0 14px rgba(184,137,74,.8);
