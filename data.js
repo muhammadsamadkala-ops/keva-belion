@@ -16,35 +16,49 @@ const LIQUID = {
 
 const PRODUCTS = [
   {id:'noir', name:'Noir', notes:'Oud · Amber · Spice', price:8900, image:'assets/products/noir.jpg',
+   gender:'men', family:'woody', intensity:'bold',
    desc:'Our darkest, most commanding scent. Smoky oud and warm amber wrapped in a spiced base — bold enough for winter nights, refined enough for daily wear.'},
-  {id:'blanc', name:'Blanc', notes:'White Florals · Musk', price:7200, image:'assets/products/blanc.jpg',
+  {id:'blanc', name:'Blanc', notes:'White Florals · Musk', price:7200, compareAtPrice:8000, image:'assets/products/blanc.jpg',
+   gender:'women', family:'floral', intensity:'light',
    desc:'A luminous white-floral built around jasmine and clean musk. Soft, confident, and easy to wear from morning to evening.'},
   {id:'ocean', name:'Ocean', notes:'Marine · Citrus · Ambergris', price:7800, image:'assets/products/ocean.jpg',
+   gender:'men', family:'fresh', intensity:'light',
    desc:'Fresh marine notes over bright citrus, settling into a soft ambergris base. Our most refreshing scent — built for warm days.'},
   {id:'rouge', name:'Rouge', notes:'Rose · Berries · Spice', price:8200, image:'assets/products/rouge.jpg',
+   gender:'women', family:'floral', intensity:'bold',
    desc:'Deep rose and dark berries warmed with a touch of spice. Romantic and rich — the kind of scent that lingers on a scarf.'},
-  {id:'vert', name:'Vert', notes:'Green Notes · Fig · Vetiver', price:7500, image:'assets/products/vert.jpg',
+  {id:'vert', name:'Vert', notes:'Green Notes · Fig · Vetiver', price:7500, compareAtPrice:8300, image:'assets/products/vert.jpg',
+   gender:'unisex', family:'fresh', intensity:'light',
    desc:'Crisp green notes and fig, grounded in earthy vetiver. Clean, natural, and quietly confident — our take on a modern green scent.'},
   {id:'amber', name:'Amber', notes:'Amber · Vanilla · Woods', price:8500, image:'assets/products/amber.jpg',
+   gender:'unisex', family:'sweet', intensity:'bold',
    desc:'Warm amber and soft vanilla over a woody base. Cosy and enveloping — built to last long after the sun goes down.'},
-  {id:'fleur', name:'Fleur', notes:'Peony · Pink Florals · Musk', price:7400, image:'assets/products/fleur.jpg',
+  {id:'fleur', name:'Fleur', notes:'Peony · Pink Florals · Musk', price:7400, compareAtPrice:8200, image:'assets/products/fleur.jpg',
+   gender:'women', family:'floral', intensity:'light',
    desc:'Soft peony and pink florals over a gentle musk base. Light, romantic, and effortless — an everyday floral that never feels heavy.'},
   {id:'elegance', name:'Élégance', notes:'Iris · White Musk · Woods', price:9200, image:'assets/products/elegance.jpg',
+   gender:'unisex', family:'woody', intensity:'light',
    desc:'Powdery iris and clean white musk over refined woods. Understated and sophisticated — our most versatile, unisex composition.'},
 ];
 
 const INSPIRED = [
   {id:'sauvagenoir', name:'Sauvage Noir', inspiredBy:'Dior Sauvage', notes:'Bergamot · Ambroxan', price:5500,
+   gender:'men', family:'fresh', intensity:'bold',
    desc:'Our interpretation of the modern fresh-spicy classic — sharp bergamot up top, settling into a clean, radiant ambroxan base. Long-lasting and versatile.'},
-  {id:'bleuele', name:'Bleu Elegance', inspiredBy:'Chanel Bleu de Chanel', notes:'Citrus · Woods', price:5500,
+  {id:'bleuele', name:'Bleu Elegance', inspiredBy:'Chanel Bleu de Chanel', notes:'Citrus · Woods', price:5500, compareAtPrice:6200,
+   gender:'men', family:'fresh', intensity:'bold',
    desc:'Citrus and aromatic woods in a clean, confident composition inspired by one of the most iconic men\'s fragrances. Sharp, elegant, and office-appropriate.'},
   {id:'oudreserve', name:'Oud Wood Reserve', inspiredBy:'Tom Ford Oud Wood', notes:'Oud · Sandalwood', price:6500,
+   gender:'men', family:'woody', intensity:'bold',
    desc:'Smooth oud layered over creamy sandalwood and a hint of spice — our take on a luxury house classic, bottled at a fraction of the price.'},
   {id:'blackopu', name:'Black Opulence', inspiredBy:'YSL Black Opium', notes:'Coffee · Vanilla', price:5900,
+   gender:'women', family:'sweet', intensity:'bold',
    desc:'Dark coffee and sweet vanilla collide in this bold, addictive evening scent inspired by a modern icon. Not for the faint-hearted.'},
   {id:'baccbloom', name:'Baccarat Bloom', inspiredBy:'MFK Baccarat Rouge 540', notes:'Saffron · Amber', price:6900,
+   gender:'unisex', family:'sweet', intensity:'bold',
    desc:'Saffron, amber and a crystalline musk base — our tribute to one of the most talked-about niche fragrances of the decade.'},
-  {id:'aventusn', name:'Aventus Noir', inspiredBy:'Creed Aventus', notes:'Pineapple · Birch', price:6900,
+  {id:'aventusn', name:'Aventus Noir', inspiredBy:'Creed Aventus', notes:'Pineapple · Birch', price:6900, compareAtPrice:7600,
+   gender:'men', family:'fresh', intensity:'bold',
    desc:'Fruity top notes over smoky birch and musk — inspired by the fragrance that changed how the world thinks about "confidence in a bottle".'},
 ];
 
@@ -66,22 +80,31 @@ function getProductById(id){
 })();
 
 function bottleVisualHTML(p){
+  const badge = p.compareAtPrice ? `<div class="sale-badge">Sale</div>` : '';
   if(p.image){
-    return `<div class="bottle-wrap photo-wrap"><img src="${p.image}" alt="${p.name}" loading="lazy"></div>`;
+    return `<div class="bottle-wrap photo-wrap">${badge}<img src="${p.image}" alt="${p.name}" loading="lazy"></div>`;
   }
-  return `<div class="bottle-wrap liquid-${p.id}"><svg viewBox="0 0 120 240"><use href="#bottle-shape"/></svg></div>`;
+  return `<div class="bottle-wrap liquid-${p.id}">${badge}<svg viewBox="0 0 120 240"><use href="#bottle-shape"/></svg></div>`;
+}
+
+function priceHTML(p){
+  if(p.compareAtPrice && p.compareAtPrice > p.price){
+    return `<div class="price">PKR ${p.price.toLocaleString()} <span class="compare-price">PKR ${p.compareAtPrice.toLocaleString()}</span></div>`;
+  }
+  return `<div class="price">PKR ${p.price.toLocaleString()}</div>`;
 }
 
 function renderProductCard(p, container, linkToDetail){
   const card = document.createElement('div');
   card.className = 'product-card reveal';
   const visual = bottleVisualHTML(p);
+  const priceBlock = priceHTML(p);
   const inner = `
     ${visual}
     ${p.inspiredBy ? `<div class="inspired-tag">Inspired by ${p.inspiredBy}</div>` : ''}
     <h3>${p.name}</h3>
     <div class="notes">${p.notes}</div>
-    <div class="price">PKR ${p.price.toLocaleString()}</div>
+    ${priceBlock}
     <button class="add-btn" data-id="${p.id}">Add to bag</button>
   `;
   if(linkToDetail){
@@ -90,7 +113,7 @@ function renderProductCard(p, container, linkToDetail){
       ${p.inspiredBy ? `<div class="inspired-tag">Inspired by ${p.inspiredBy}</div>` : ''}
       <h3>${p.name}</h3>
       <div class="notes">${p.notes}</div>
-      <div class="price">PKR ${p.price.toLocaleString()}</div>
+      ${priceBlock}
     </a>
     <button class="add-btn" data-id="${p.id}">Add to bag</button>`;
   } else {

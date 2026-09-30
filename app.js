@@ -129,7 +129,12 @@ function checkoutFormHTML(){
         <label>Payment method</label>
         <div class="pay-options">
           <div class="pay-option active" data-method="cod">Cash on Delivery</div>
-          <div class="pay-option" data-method="card">Debit / Credit Card</div>
+          <div class="pay-option" data-method="card">
+            <span class="pay-option-icons">
+              <svg viewBox="0 0 24 16" width="26" height="17"><rect x="0.5" y="0.5" width="23" height="15" rx="2.5" fill="#fff" stroke="var(--line)"/><rect x="0.5" y="4" width="23" height="3" fill="var(--gold)"/><rect x="2.5" y="10.5" width="6" height="2" rx="1" fill="var(--text-muted)"/></svg>
+            </span>
+            Debit / Credit Card
+          </div>
         </div>
         <div class="bank-details" id="cardDetails">
           <div class="field" style="margin-bottom:12px;">

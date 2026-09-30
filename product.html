@@ -22,6 +22,7 @@
 </svg>
 
 <div id="site-header"></div>
+<div id="site-trustbar"></div>
 
 <div id="productDetailRoot"></div>
 
@@ -65,7 +66,7 @@
           ${product.inspiredBy ? `<div class="inspired-tag">Inspired by ${product.inspiredBy}</div>` : ''}
           <h1>${product.name}</h1>
           <div class="notes-line">${product.notes}</div>
-          <div class="price">PKR ${product.price.toLocaleString()}</div>
+          <div class="price">PKR ${product.price.toLocaleString()}${product.compareAtPrice ? ` <span class="compare-price">PKR ${product.compareAtPrice.toLocaleString()}</span>` : ''}</div>
           <p class="desc">${product.desc || ''}</p>
           <div class="qty-select-row">
             <button class="qty-btn" id="detailQtyMinus">−</button>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Your Scent — Kiva Belion</title>
+<meta name="description" content="Answer a few quick questions and we'll match you to a Kiva Belion fragrance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="bottle-shape" viewBox="0 0 120 240">
+    <rect x="42" y="4" width="36" height="20" rx="6" class="bottle-cap"/>
+    <circle cx="60" cy="14" r="5" class="bottle-gem"/>
+    <path d="M48 24 L48 46 Q48 58 34 64 Q20 70 20 92 L20 210 Q20 226 36 226 L84 226 Q100 226 100 210 L100 92 Q100 70 86 64 Q72 58 72 46 L72 24 Z" class="bottle-body"/>
+    <rect x="20" y="120" width="80" height="3" class="bottle-band"/>
+  </symbol>
+</svg>
+
+<div id="site-header"></div>
+<div id="site-trustbar"></div>
+
+<div class="page-header">
+  <div class="crumb"><a href="index.html">Home</a> / Find Your Scent</div>
+  <h1>Find your scent</h1>
+  <p>Three quick questions, and we'll point you to the Kiva Belion fragrance that fits you best.</p>
+</div>
+
+<div class="quiz-wrap">
+  <div class="quiz-card" id="quizCard"></div>
+</div>
+
+<div id="site-footer-modals"></div>
+
+<script src="partials.js"></script>
+<script src="data.js"></script>
+<script>
+  const QUIZ_QUESTIONS = [
+    {
+      key: 'gender',
+      question: "Who's this fragrance for?",
+      options: [
+        {label:'Him', value:'men'},
+        {label:'Her', value:'women'},
+        {label:"Doesn't matter", value:'unisex'},
+      ]
+    },
+    {
+      key: 'family',
+      question: 'Which of these sounds most like you?',
+      options: [
+        {label:'Fresh & clean', value:'fresh'},
+        {label:'Floral & romantic', value:'floral'},
+        {label:'Warm & sweet', value:'sweet'},
+        {label:'Deep & woody', value:'woody'},
+      ]
+    },
+    {
+      key: 'intensity',
+      question: 'How strong do you want it?',
+      options: [
+        {label:'Light — everyday wear', value:'light'},
+        {label:'Bold — long-lasting', value:'bold'},
+      ]
+    }
+  ];
+
+  let currentStep = 0;
+  const answers = {};
+  const quizCard = document.getElementById('quizCard');
+
+  function renderProgress(){
+    let dots = '';
+    for(let i=0;i<QUIZ_QUESTIONS.length;i++){
+      dots += `<span class="${i < currentStep ? 'done' : ''}"></span>`;
+    }
+    return `<div class="quiz-progress">${dots}</div>`;
+  }
+
+  function renderQuestion(){
+    const q = QUIZ_QUESTIONS[currentStep];
+    quizCard.innerHTML = `
+      ${renderProgress()}
+      <div class="quiz-question">
+        <h2>${q.question}</h2>
+        <div class="quiz-options">
+          ${q.options.map(opt => `<div class="quiz-option" data-value="${opt.value}">${opt.label}</div>`).join('')}
+        </div>
+        ${currentStep > 0 ? '<span class="quiz-back" id="quizBack">← Back</span>' : ''}
+      </div>
+    `;
+    quizCard.querySelectorAll('.quiz-option').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        answers[q.key] = el.dataset.value;
+        currentStep++;
+        if(currentStep >= QUIZ_QUESTIONS.length){
+          renderResult();
+        } else {
+          renderQuestion();
+        }
+      });
+    });
+    const backBtn = document.getElementById('quizBack');
+    if(backBtn){
+      backBtn.addEventListener('click', ()=>{
+        currentStep--;
+        renderQuestion();
+      });
+    }
+  }
+
+  function findMatch(){
+    const pool = ALL_PRODUCTS;
+    const matchesAll = pool.filter(p =>
+      (answers.gender === 'unisex' || p.gender === answers.gender || p.gender === 'unisex') &&
+      p.family === answers.family &&
+      p.intensity === answers.intensity
+    );
+    if(matchesAll.length) return matchesAll[0];
+
+    // relax intensity
+    const relaxIntensity = pool.filter(p =>
+      (answers.gender === 'unisex' || p.gender === answers.gender || p.gender === 'unisex') &&
+      p.family === answers.family
+    );
+    if(relaxIntensity.length) return relaxIntensity[0];
+
+    // relax family too, keep gender
+    const relaxFamily = pool.filter(p =>
+      (answers.gender === 'unisex' || p.gender === answers.gender || p.gender === 'unisex')
+    );
+    if(relaxFamily.length) return relaxFamily[0];
+
+    // fallback: anything
+    return pool[0];
+  }
+
+  function renderResult(){
+    const product = findMatch();
+    const visual = bottleVisualHTML(product);
+    const priceBlock = priceHTML(product);
+    quizCard.innerHTML = `
+      <div class="quiz-result">
+        <div class="quiz-result-tag">Your match</div>
+        ${visual}
+        ${product.inspiredBy ? `<div class="inspired-tag">Inspired by ${product.inspiredBy}</div>` : ''}
+        <h2>${product.name}</h2>
+        <div class="notes">${product.notes}</div>
+        ${priceBlock}
+        <div class="quiz-result-actions">
+          <button class="btn btn-primary" id="quizAddBtn" data-id="${product.id}">Add to bag</button>
+          <a class="btn btn-ghost" href="product.html?id=${product.id}">View details</a>
+        </div>
+        <span class="quiz-restart" id="quizRestart">Start over</span>
+      </div>
+    `;
+    document.getElementById('quizAddBtn').addEventListener('click', (e)=>{
+      addToCart(product.id);
+      e.target.textContent = 'Added ✓';
+      setTimeout(()=>{ e.target.textContent = 'Add to bag'; }, 1400);
+    });
+    document.getElementById('quizRestart').addEventListener('click', ()=>{
+      currentStep = 0;
+      delete answers.gender; delete answers.family; delete answers.intensity;
+      renderQuestion();
+    });
+  }
+
+  renderQuestion();
+</script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -23,11 +23,11 @@ function injectHeader(){
     </a>
     <nav class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
-      <a href="index.html#journey">Journey</a>
       <a href="signature-collection.html">Collection</a>
       <a href="inspired-collection.html">Inspired</a>
+      <a href="quiz.html">Find Your Scent</a>
       <a href="index.html#about">About</a>
-      <a href="index.html#contact">Contact</a>
+      <a href="faq.html">FAQs</a>
     </nav>
     <div class="nav-right">
       <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
@@ -38,6 +38,21 @@ function injectHeader(){
     </div>
   </div>
 </header>
+`;
+}
+
+function injectTrustBar(){
+  const el = document.getElementById('site-trustbar');
+  if(!el) return;
+  el.outerHTML = `
+<section class="trust-bar">
+  <div class="trust-bar-inner">
+    <div class="trust-item"><span class="trust-icon">🇵🇰</span> Made in Pakistan</div>
+    <div class="trust-item"><span class="trust-icon">🧴</span> Hand-bottled in small batches</div>
+    <div class="trust-item"><span class="trust-icon">🚚</span> Cash on Delivery available</div>
+    <div class="trust-item"><span class="trust-icon">↩</span> Easy 7-day returns</div>
+  </div>
+</section>
 `;
 }
 
@@ -80,9 +95,9 @@ function injectFooterAndModals(){
     <div>
       <h4>Support</h4>
       <ul>
-        <li><a href="#">Shipping &amp; returns</a></li>
-        <li><a href="#">Track my order</a></li>
-        <li><a href="#">FAQs</a></li>
+        <li><a href="returns.html">Shipping &amp; returns</a></li>
+        <li><a href="quiz.html">Find your scent</a></li>
+        <li><a href="faq.html">FAQs</a></li>
       </ul>
     </div>
     <div>
@@ -126,4 +141,5 @@ function injectFooterAndModals(){
 }
 
 injectHeader();
+injectTrustBar();
 injectFooterAndModals();
