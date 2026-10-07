@@ -5,17 +5,6 @@ function injectHeader(){
   const el = document.getElementById('site-header');
   if(!el) return;
   el.outerHTML = `
-<div class="announce" aria-hidden="true">
-  <div class="announce-track">
-    <span>✦ Free delivery across Pakistan on orders over PKR 10,000</span>
-    <span>✦ Cash on Delivery &amp; Bank Transfer accepted</span>
-    <span>✦ Small-batch, hand-finished fragrances</span>
-    <span>✦ Free delivery across Pakistan on orders over PKR 10,000</span>
-    <span>✦ Cash on Delivery &amp; Bank Transfer accepted</span>
-    <span>✦ Small-batch, hand-finished fragrances</span>
-  </div>
-</div>
-
 <header class="site-nav">
   <div class="nav-inner">
     <a href="index.html" class="logo-chip" aria-label="Kiva Belion home">
