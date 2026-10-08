@@ -64,7 +64,7 @@
       question: 'How strong do you want it?',
       options: [
         {label:'Light — everyday wear', value:'light'},
-        {label:'Bold — long-lasting', value:'bold'},
+        {label:'Bold — stands out', value:'bold'},
       ]
     }
   ];
@@ -150,6 +150,7 @@
         ${product.inspiredBy ? `<div class="inspired-tag">Inspired by ${product.inspiredBy}</div>` : ''}
         <h2>${product.name}</h2>
         <div class="notes">${product.notes}</div>
+        <p class="quiz-result-desc">${shortDesc(product)}</p>
         ${priceBlock}
         <div class="quiz-result-actions">
           <button class="btn btn-primary" id="quizAddBtn" data-id="${product.id}">Add to bag</button>

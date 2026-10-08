@@ -53,6 +53,24 @@
     const collectionHref = product.inspiredBy ? 'inspired-collection.html' : 'signature-collection.html';
     const collectionLabel = product.inspiredBy ? 'Inspired by Icons' : 'Signature Collection';
 
+    const pyr = product.pyramid;
+    const pyramidHTML = pyr ? `
+      <div class="pyramid">
+        <h3 class="detail-sub">Fragrance notes</h3>
+        ${[['Top','top'],['Heart','heart'],['Base','base']].map(([label,key]) => `
+          <div class="pyr-row">
+            <span class="pyr-label">${label}</span>
+            <span class="pyr-notes">${(pyr[key]||[]).map(n => `<span class="note-chip">${n}</span>`).join('')}</span>
+          </div>`).join('')}
+      </div>` : '';
+
+    const profileHTML = `
+      <div class="profile-chips">
+        ${product.family ? `<span class="profile-chip"><b>Family</b> ${FAMILY_LABEL[product.family]}</span>` : ''}
+        ${product.gender ? `<span class="profile-chip"><b>Best for</b> ${GENDER_LABEL[product.gender]}</span>` : ''}
+        ${product.intensity ? `<span class="profile-chip"><b>Strength</b> ${INTENSITY_LABEL[product.intensity]}</span>` : ''}
+      </div>`;
+
     root.innerHTML = `
       <div class="product-detail">
         <div class="product-detail-visual">
@@ -65,19 +83,24 @@
           <div class="crumb"><a href="index.html">Home</a> / <a href="${collectionHref}">${collectionLabel}</a> / ${product.name}</div>
           ${product.inspiredBy ? `<div class="inspired-tag">Inspired by ${product.inspiredBy}</div>` : ''}
           <h1>${product.name}</h1>
-          <div class="notes-line">${product.notes}</div>
+          <div class="detail-size">Eau de Parfum · 100 ML</div>
           <div class="price">PKR ${product.price.toLocaleString()}${product.compareAtPrice ? ` <span class="compare-price">PKR ${product.compareAtPrice.toLocaleString()}</span>` : ''}</div>
           <p class="desc">${product.desc || ''}</p>
+          ${profileHTML}
+          ${pyramidHTML}
           <div class="qty-select-row">
-            <button class="qty-btn" id="detailQtyMinus">−</button>
+            <button class="qty-btn" id="detailQtyMinus" aria-label="Decrease quantity">−</button>
             <span class="qty-val" id="detailQtyVal">1</span>
-            <button class="qty-btn" id="detailQtyPlus">+</button>
+            <button class="qty-btn" id="detailQtyPlus" aria-label="Increase quantity">+</button>
           </div>
-          <button class="btn btn-primary detail-add-btn" id="detailAddBtn">Add to bag</button>
+          <div class="detail-actions">
+            <button class="btn btn-primary detail-add-btn" id="detailAddBtn">Add to Cart</button>
+            <a class="btn btn-whatsapp detail-wa-btn" id="detailWaBtn" href="#" target="_blank" rel="noopener">Order via WhatsApp</a>
+          </div>
           <div class="detail-meta">
-            <div><span class="dot"></span> Free delivery across Pakistan on orders over PKR 10,000</div>
-            <div><span class="dot"></span> Cash on Delivery &amp; Bank Transfer accepted</div>
-            <div><span class="dot"></span> Small-batch, hand-finished in Karachi</div>
+            <div><span class="dot"></span> Cash on Delivery, or order directly on WhatsApp</div>
+            <div><span class="dot"></span> Formulated and hand-bottled in Karachi</div>
+            <div><span class="dot"></span> 7-day returns on unopened bottles — <a href="returns.html" style="text-decoration:underline;">see policy</a></div>
           </div>
         </div>
       </div>
@@ -85,16 +108,21 @@
 
     let qty = 1;
     const qtyVal = document.getElementById('detailQtyVal');
+    const waBtn = document.getElementById('detailWaBtn');
+    function refreshWa(){
+      waBtn.href = buildWhatsAppOrderUrl([{name:product.name, price:product.price, qty:qty}]);
+    }
+    refreshWa();
     document.getElementById('detailQtyMinus').addEventListener('click', ()=>{
-      qty = Math.max(1, qty-1); qtyVal.textContent = qty;
+      qty = Math.max(1, qty-1); qtyVal.textContent = qty; refreshWa();
     });
     document.getElementById('detailQtyPlus').addEventListener('click', ()=>{
-      qty = qty+1; qtyVal.textContent = qty;
+      qty = qty+1; qtyVal.textContent = qty; refreshWa();
     });
     document.getElementById('detailAddBtn').addEventListener('click', (e)=>{
       addToCart(product.id, qty);
       e.target.textContent = 'Added ✓';
-      setTimeout(()=>{ e.target.textContent='Add to bag'; }, 1400);
+      setTimeout(()=>{ e.target.textContent='Add to Cart'; }, 1400);
     });
 
     // Related products: same category, excluding current
@@ -103,7 +131,7 @@
     if(related.length){
       document.getElementById('relatedRoot').style.display = 'block';
       const relatedGrid = document.getElementById('relatedGrid');
-      related.forEach(p=>renderProductCard(p, relatedGrid, true));
+      related.forEach(p=>renderProductCard(p, relatedGrid));
     }
   }
 </script>

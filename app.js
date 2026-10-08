@@ -129,35 +129,16 @@ function checkoutFormHTML(){
         <label>Payment method</label>
         <div class="pay-options">
           <div class="pay-option active" data-method="cod">Cash on Delivery</div>
-          <div class="pay-option" data-method="card">
+          <div class="pay-option disabled" aria-disabled="true" title="Card payments are not available yet">
             <span class="pay-option-icons">
               <svg viewBox="0 0 24 16" width="26" height="17"><rect x="0.5" y="0.5" width="23" height="15" rx="2.5" fill="#fff" stroke="var(--line)"/><rect x="0.5" y="4" width="23" height="3" fill="var(--gold)"/><rect x="2.5" y="10.5" width="6" height="2" rx="1" fill="var(--text-muted)"/></svg>
             </span>
-            Debit / Credit Card
+            Card · coming soon
           </div>
         </div>
-        <div class="bank-details" id="cardDetails">
-          <div class="field" style="margin-bottom:12px;">
-            <label for="cardNumber">Card number</label>
-            <input type="text" id="cardNumber" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456">
-          </div>
-          <div style="display:flex; gap:12px;">
-            <div class="field" style="flex:1; margin-bottom:12px;">
-              <label for="cardExpiry">Expiry</label>
-              <input type="text" id="cardExpiry" maxlength="5" placeholder="MM/YY">
-            </div>
-            <div class="field" style="flex:1; margin-bottom:12px;">
-              <label for="cardCvv">CVV</label>
-              <input type="text" id="cardCvv" inputmode="numeric" maxlength="4" placeholder="123">
-            </div>
-          </div>
-          <div class="field" style="margin-bottom:0;">
-            <label for="cardName">Name on card</label>
-            <input type="text" id="cardName" placeholder="As shown on card">
-          </div>
-        </div>
+        <p class="pay-note">Want to pay by bank transfer instead? Order on WhatsApp and we'll share the account details.</p>
       </div>
-      <button type="submit" class="btn btn-primary modal-submit">Place order</button>
+      <button type="submit" class="btn btn-primary modal-submit">Send order on WhatsApp</button>
     </form>
   `;
 }
@@ -170,54 +151,29 @@ function openCheckout(){
 
   modalBox.querySelector('#checkoutCloseBtn').addEventListener('click', closeCheckout);
 
-  const options = modalBox.querySelectorAll('.pay-option');
-  const cardDetails = modalBox.querySelector('#cardDetails');
-  let method = 'cod';
-  options.forEach(opt=>{
-    opt.addEventListener('click', ()=>{
-      options.forEach(o=>o.classList.remove('active'));
-      opt.classList.add('active');
-      method = opt.dataset.method;
-      cardDetails.classList.toggle('show', method==='card');
-      cardDetails.querySelectorAll('input').forEach(inp=>{ inp.required = (method==='card'); });
-    });
-  });
-
-  // light auto-formatting for card fields
-  const cardNumberEl = modalBox.querySelector('#cardNumber');
-  if(cardNumberEl){
-    cardNumberEl.addEventListener('input', ()=>{
-      cardNumberEl.value = cardNumberEl.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim();
-    });
-  }
-  const cardExpiryEl = modalBox.querySelector('#cardExpiry');
-  if(cardExpiryEl){
-    cardExpiryEl.addEventListener('input', ()=>{
-      let v = cardExpiryEl.value.replace(/\D/g,'').slice(0,4);
-      if(v.length>=3) v = v.slice(0,2) + '/' + v.slice(2);
-      cardExpiryEl.value = v;
-    });
-  }
-  const cardCvvEl = modalBox.querySelector('#cardCvv');
-  if(cardCvvEl){
-    cardCvvEl.addEventListener('input', ()=>{
-      cardCvvEl.value = cardCvvEl.value.replace(/\D/g,'').slice(0,4);
-    });
-  }
-
   modalBox.querySelector('#checkoutForm').addEventListener('submit', e=>{
     e.preventDefault();
-    const orderId = 'KB-' + Math.floor(100000 + Math.random()*900000);
+    const customer = {
+      name: modalBox.querySelector('#fname').value.trim(),
+      phone: modalBox.querySelector('#fphone').value.trim(),
+      address: modalBox.querySelector('#faddress').value.trim(),
+      city: modalBox.querySelector('#fcity').value.trim(),
+    };
+    const items = cart.map(i => ({name:i.name, price:i.price, qty:i.qty}));
     const total = cartTotal();
+    const waUrl = buildWhatsAppOrderUrl(items, customer);
+    // Open WhatsApp straight away (this runs inside the user's click, so it is not blocked)
+    window.open(waUrl, '_blank', 'noopener');
     modalBox.innerHTML = `
       <button type="button" class="modal-close-btn" id="checkoutCloseBtn2" aria-label="Close">&times;</button>
       <div class="order-confirm">
-        <div class="check-circle">✓</div>
-        <h3>Order placed</h3>
-        <p>Thank you — your order <span class="oid">${orderId}</span> has been received.</p>
-        <p>Total: <strong style="color:var(--gold-bright)">PKR ${total.toLocaleString()}</strong></p>
-        <p style="margin-top:14px;">${method==='cod' ? "We'll call you shortly to confirm your Cash on Delivery order." : "Your card payment is being verified — you'll receive a confirmation shortly."}</p>
-        <button class="btn btn-ghost" style="margin-top:22px;" id="closeConfirm">Continue shopping</button>
+        <div class="check-circle">→</div>
+        <h3>One last step</h3>
+        <p>Your order is ready — <strong>it is only confirmed once you send the message in WhatsApp.</strong></p>
+        <p>Total: <strong style="color:var(--gold-bright)">PKR ${total.toLocaleString()}</strong> · Cash on Delivery</p>
+        <p style="margin-top:14px;">WhatsApp didn't open? Tap the button below.</p>
+        <a class="btn btn-whatsapp" style="margin-top:14px;" href="${waUrl}" target="_blank" rel="noopener">Open WhatsApp</a>
+        <div><button class="btn btn-ghost" style="margin-top:12px;" id="closeConfirm">Continue shopping</button></div>
       </div>
     `;
     cart = [];
@@ -230,6 +186,17 @@ function closeCheckout(){
   if(!checkoutModal) return;
   checkoutModal.classList.remove('show');
   overlay.classList.remove('show');
+}
+const waOrderBtnEl = document.getElementById('waOrderBtn');
+if(waOrderBtnEl){
+  waOrderBtnEl.addEventListener('click', ()=>{
+    if(cart.length === 0){
+      const empty = document.querySelector('.cart-empty');
+      if(empty) empty.style.color = 'var(--coral)';
+      return;
+    }
+    window.open(buildWhatsAppOrderUrl(cart), '_blank', 'noopener');
+  });
 }
 const checkoutBtnEl = document.getElementById('checkoutBtn');
 if(checkoutBtnEl){
@@ -294,37 +261,3 @@ function initScrollReveal(){
   }
 }
 initScrollReveal();
-
-// ---------- COUNT UP ----------
-function animateCount(el){
-  const target = parseFloat(el.dataset.count);
-  const prefix = el.dataset.prefix || '';
-  const suffix = el.dataset.suffix || '';
-  const duration = 1200;
-  const start = performance.now();
-  function step(now){
-    const progress = Math.min((now-start)/duration, 1);
-    const eased = 1 - Math.pow(1-progress, 3);
-    const val = Math.round(target*eased);
-    el.textContent = prefix + val + suffix;
-    if(progress<1){ requestAnimationFrame(step); }
-  }
-  requestAnimationFrame(step);
-}
-const statEls = document.querySelectorAll('.about-stats strong[data-count]');
-if('IntersectionObserver' in window && statEls.length){
-  const statIo = new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        if(reduceMotion){
-          const el = entry.target;
-          el.textContent = (el.dataset.prefix||'') + el.dataset.count + (el.dataset.suffix||'');
-        } else {
-          animateCount(entry.target);
-        }
-        statIo.unobserve(entry.target);
-      }
-    });
-  }, {threshold:0.4});
-  statEls.forEach(el=>statIo.observe(el));
-}

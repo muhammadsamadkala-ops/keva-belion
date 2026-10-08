@@ -27,7 +27,7 @@
 <!-- HERO -->
 <section class="hero hero-video-active" id="top">
   <div class="hero-video-wrap" aria-hidden="true">
-    <video autoplay muted loop playsinline poster="assets/products/noir.jpg">
+    <video autoplay muted loop playsinline poster="assets/hero-poster.jpg">
       <source src="assets/kiva-hero.mp4" type="video/mp4">
     </video>
     <div class="hero-video-overlay"></div>
@@ -60,14 +60,44 @@
       <p>We mix, test and bottle everything ourselves in Karachi. Nothing here is bought in bulk from a supplier and relabeled with our name.</p>
       <p>There are eight scents right now, with more in progress. We only put one up once it's actually ready — not on a schedule, and not just to hit a number.</p>
       <div class="about-stats reveal-stagger">
-        <div class="reveal"><strong data-count="8" data-suffix="">0</strong><span>Scents right now</span></div>
-        <div class="reveal"><strong data-count="100" data-suffix="%">0%</strong><span>Hand-finished</span></div>
-        <div class="reveal"><strong data-count="9" data-suffix="h" data-prefix="8–">0h</strong><span>Average wear time</span></div>
+        <div class="reveal"><strong>8</strong><span>Scents right now</span></div>
+        <div class="reveal"><strong>100%</strong><span>Hand-bottled by us</span></div>
+        <div class="reveal"><strong>7 days</strong><span>Easy returns</span></div>
       </div>
     </div>
     <div class="about-visual">
       <div class="about-visual-glow"></div>
       <img src="assets/products/noir.jpg" alt="Kiva Belion Noir">
+    </div>
+  </div>
+</section>
+
+<!-- WHY KIVA BELION -->
+<section class="why" id="why">
+  <div class="why-head reveal">
+    <h2>Why Kiva Belion?</h2>
+    <p>Four things we're happy to be held to.</p>
+  </div>
+  <div class="why-grid reveal-stagger">
+    <div class="why-card reveal">
+      <div class="why-num">1</div>
+      <h3>We make it ourselves</h3>
+      <p>Every fragrance is mixed and bottled by us in Karachi. We don't buy finished perfume and put our label on it.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-num">2</div>
+      <h3>Honest about inspiration</h3>
+      <p>Where a scent is inspired by a well-known fragrance, we say so clearly. It is our own formula, never passed off as the original.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-num">3</div>
+      <h3>Order the way you like</h3>
+      <p>Pay Cash on Delivery, or just message us on WhatsApp and we'll take your order there.</p>
+    </div>
+    <div class="why-card reveal">
+      <div class="why-num">4</div>
+      <h3>Fair returns</h3>
+      <p>Unopened bottles can be returned within 7 days, and if something arrives damaged we'll replace it. <a href="returns.html">Read the policy</a>.</p>
     </div>
   </div>
 </section>
@@ -116,7 +146,7 @@
       </div>
       <div class="stage-time">4 hours onward</div>
       <h3>Base notes</h3>
-      <p>What lingers — oud, amber, musk. The reason a scent is still on your scarf the next morning.</p>
+      <p>What lingers — oud, amber, musk. The notes that stay once the rest has faded.</p>
     </div>
   </div>
 </section>
@@ -147,6 +177,14 @@
   </div>
 </section>
 
+<!-- REVIEWS -->
+<section class="reviews" id="reviews">
+  <div class="why-head reveal">
+    <h2>What customers say</h2>
+  </div>
+  <div class="reviews-grid" id="reviewsGrid"></div>
+</section>
+
 <div id="site-footer-modals"></div>
 
 <script src="partials.js"></script>
@@ -156,6 +194,29 @@
   PRODUCTS.forEach(p=>renderProductCard(p, grid, true));
   const inspiredGrid = document.getElementById('inspiredGrid');
   INSPIRED.forEach(p=>renderProductCard(p, inspiredGrid, true));
+</script>
+<script>
+  (function renderReviews(){
+    const grid = document.getElementById('reviewsGrid');
+    if(!grid) return;
+    if(!REVIEWS.length){
+      grid.innerHTML = `
+        <div class="reviews-empty">
+          <p>We're a new brand, so there are no reviews here yet — and we won't make any up.</p>
+          <p>Tried a Kiva Belion fragrance? We'd love to hear what you think.</p>
+          <a href="#" id="reviewWaLink" class="btn btn-primary" target="_blank" rel="noopener">Share your feedback on WhatsApp</a>
+        </div>`;
+      const msg = encodeURIComponent("Hi Kiva Belion! I'd like to share my feedback on my order:");
+      document.getElementById('reviewWaLink').href = WA_BASE + '?text=' + msg;
+      return;
+    }
+    grid.innerHTML = REVIEWS.map(r => `
+      <div class="review-card">
+        <div class="review-stars">${'★'.repeat(r.rating||5)}${'☆'.repeat(5-(r.rating||5))}</div>
+        <p>“${r.text}”</p>
+        <div class="review-meta"><b>${r.name}</b>${r.city ? ' · ' + r.city : ''}${r.product ? ' · ' + r.product : ''}</div>
+      </div>`).join('');
+  })();
 </script>
 <script src="app.js"></script>
 </body>
