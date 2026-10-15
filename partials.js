@@ -1,7 +1,32 @@
 /* ============ CONTACT SETTINGS — change these two lines to update everywhere ============ */
-const WHATSAPP_NUMBER = '923000000000';      // country code + number, no + or spaces (e.g. 923001234567)
-const PHONE_DISPLAY   = '+92 300 0000000';   // how the number is shown on the site
+const WHATSAPP_NUMBER = '923702203020';      // country code + number, no + or spaces
+const PHONE_DISPLAY   = '0370 2203020';      // how the number is shown on the site
 const WA_BASE = 'https://wa.me/' + WHATSAPP_NUMBER;
+
+const SOCIAL = {
+  instagram: 'https://instagram.com/kivabelion',
+  tiktok:    'https://www.tiktok.com/@kivabelion',
+  facebook:  'https://www.facebook.com/share/1DiZEfJ4zz/',
+};
+
+// Simple line/solid icons (drawn for this site) for the social links
+const SOCIAL_ICONS = {
+  instagram: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg>',
+  facebook:  '<svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.6h2.6l.4-3.1h-3V8.4c0-.9.3-1.5 1.6-1.5h1.6V4.1c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.3H7.9v3.1h2.6V21h3z"/></svg>',
+  tiktok:    '<svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true"><path d="M16.6 3h-2.9v11.6a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.1a5.6 5.6 0 1 0 4.7 5.5V9a6.9 6.9 0 0 0 4 1.3V7.4A4.1 4.1 0 0 1 16.6 3z"/></svg>',
+  whatsapp:  '<svg viewBox="0 0 32 32" width="19" height="19" fill="currentColor" aria-hidden="true"><path d="M16.02 3C9.4 3 4 8.4 4 15.02c0 2.36.66 4.56 1.8 6.44L4 29l7.72-1.75a11.9 11.9 0 0 0 4.3.8h.01c6.62 0 12.02-5.4 12.02-12.02C28.05 8.4 22.65 3 16.02 3zm5.4 18.57c-.25.7-1.45 1.34-2 1.42-.51.08-1.16.11-1.87-.12-.43-.14-.98-.32-1.7-.63-2.98-1.28-4.93-4.28-5.08-4.48-.15-.2-1.21-1.61-1.21-3.07s.77-2.17 1.04-2.47c.27-.3.59-.37.79-.37h.57c.18 0 .43-.07.67.51.25.6.85 2.07.92 2.22.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.45.52-.15.15-.3.31-.13.61.17.3.77 1.27 1.65 2.05 1.13 1.01 2.09 1.32 2.39 1.47.3.15.47.12.65-.07.17-.2.75-.87.95-1.17.2-.3.4-.25.67-.15.27.1 1.73.82 2.03.97.3.15.5.22.57.35.07.12.07.72-.18 1.42z"/></svg>',
+};
+function socialLinksHTML(){
+  const items = [
+    ['instagram','Instagram', SOCIAL.instagram],
+    ['facebook','Facebook',  SOCIAL.facebook],
+    ['tiktok','TikTok',      SOCIAL.tiktok],
+    ['whatsapp','WhatsApp',  WA_BASE],
+  ];
+  return items.map(([k,label,url]) =>
+    `<a href="${url}" target="_blank" rel="noopener" aria-label="${label}" title="${label}">${SOCIAL_ICONS[k]}</a>`
+  ).join('');
+}
 
 /* ============ SHARED HEADER / FOOTER / CART MARKUP ============ */
 /* Injected at load time so every page stays in sync from one place. */
@@ -75,6 +100,7 @@ function injectFooterAndModals(){
     <div class="footer-brand">
       <span class="logo-chip"><img src="assets/logo.png" alt="Kiva Belion"></span>
       <p>Small-batch eau de parfums made and finished by hand in Karachi, Pakistan.</p>
+      <div class="socials socials-brand">${socialLinksHTML()}</div>
       <div class="payment-note"><span class="dot"></span> Cash on Delivery &amp; WhatsApp orders</div>
     </div>
     <div>
@@ -97,19 +123,15 @@ function injectFooterAndModals(){
     <div>
       <h4>Get in touch</h4>
       <ul>
+        <li><a href="tel:+${WHATSAPP_NUMBER}">Call: ${PHONE_DISPLAY}</a></li>
+        <li><a href="${WA_BASE}" target="_blank" rel="noopener">WhatsApp: ${PHONE_DISPLAY}</a></li>
         <li><a href="mailto:kevibelion@gmail.com">kevibelion@gmail.com</a></li>
-        <li><a href="tel:+${WHATSAPP_NUMBER}">${PHONE_DISPLAY}</a></li>
         <li><span style="color:var(--text-muted); font-size:14px;">Karachi, Pakistan</span></li>
       </ul>
     </div>
   </div>
   <div class="footer-bottom">
     <span>© 2026 Kiva Belion. All rights reserved.</span>
-    <div class="socials">
-      <a href="#" aria-label="Instagram">IG</a>
-      <a href="#" aria-label="Facebook">FB</a>
-      <a href="#" aria-label="WhatsApp">WA</a>
-    </div>
   </div>
 </footer>
 

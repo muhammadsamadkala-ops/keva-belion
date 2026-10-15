@@ -180,3 +180,10 @@ City: ${c.city || ''}
 Payment: Cash on Delivery`;
   return `${WA_BASE}?text=${encodeURIComponent(msg)}`;
 }
+
+
+/* ============ CUSTOMER REVIEWS ============
+   Add ONLY real reviews from real customers (with their permission).
+   Format: {name:'Ali R.', city:'Karachi', product:'Noir', rating:5, text:'Their own words.'}
+   While this list is empty, the site shows an honest "be the first" message instead. */
+const REVIEWS = [];

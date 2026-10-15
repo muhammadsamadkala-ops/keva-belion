@@ -261,3 +261,19 @@ function initScrollReveal(){
   }
 }
 initScrollReveal();
+
+
+// ---------- COMPACT HEADER ON SCROLL ----------
+(function(){
+  const nav = document.querySelector('.site-nav');
+  if(!nav) return;
+  let ticking = false;
+  function update(){
+    nav.classList.toggle('compact', window.scrollY > 60);
+    ticking = false;
+  }
+  window.addEventListener('scroll', ()=>{
+    if(!ticking){ window.requestAnimationFrame(update); ticking = true; }
+  }, {passive:true});
+  update();
+})();

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=20261016a">
 </head>
 <body>
 
@@ -75,30 +75,31 @@
 <!-- WHY KIVA BELION -->
 <section class="why" id="why">
   <div class="why-head reveal">
+    <span class="why-rule"></span>
     <h2>Why Kiva Belion?</h2>
     <p>Four things we're happy to be held to.</p>
   </div>
   <div class="why-grid reveal-stagger">
-    <div class="why-card reveal">
-      <div class="why-num">1</div>
+    <article class="why-card reveal">
+      <div class="why-icon"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4A2 2 0 0 0 19 18l-5-9V3"/><path d="M7.5 15h9"/></svg></div>
       <h3>We make it ourselves</h3>
       <p>Every fragrance is mixed and bottled by us in Karachi. We don't buy finished perfume and put our label on it.</p>
-    </div>
-    <div class="why-card reveal">
-      <div class="why-num">2</div>
+    </article>
+    <article class="why-card reveal">
+      <div class="why-icon"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
       <h3>Honest about inspiration</h3>
       <p>Where a scent is inspired by a well-known fragrance, we say so clearly. It is our own formula, never passed off as the original.</p>
-    </div>
-    <div class="why-card reveal">
-      <div class="why-num">3</div>
+    </article>
+    <article class="why-card reveal">
+      <div class="why-icon"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.4A8.5 8.5 0 1 1 21 12z"/></svg></div>
       <h3>Order the way you like</h3>
       <p>Pay Cash on Delivery, or just message us on WhatsApp and we'll take your order there.</p>
-    </div>
-    <div class="why-card reveal">
-      <div class="why-num">4</div>
+    </article>
+    <article class="why-card reveal">
+      <div class="why-icon"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></div>
       <h3>Fair returns</h3>
       <p>Unopened bottles can be returned within 7 days, and if something arrives damaged we'll replace it. <a href="returns.html">Read the policy</a>.</p>
-    </div>
+    </article>
   </div>
 </section>
 
@@ -187,8 +188,8 @@
 
 <div id="site-footer-modals"></div>
 
-<script src="partials.js"></script>
-<script src="data.js"></script>
+<script src="partials.js?v=20261016a"></script>
+<script src="data.js?v=20261016a"></script>
 <script>
   const grid = document.getElementById('productGrid');
   PRODUCTS.forEach(p=>renderProductCard(p, grid, true));
@@ -218,6 +219,6 @@
       </div>`).join('');
   })();
 </script>
-<script src="app.js"></script>
+<script src="app.js?v=20261016a"></script>
 </body>
 </html>
