@@ -60,21 +60,6 @@ function injectHeader(){
 `;
 }
 
-function injectTrustBar(){
-  const el = document.getElementById('site-trustbar');
-  if(!el) return;
-  el.outerHTML = `
-<section class="trust-bar">
-  <div class="trust-bar-inner">
-    <div class="trust-item"><span class="trust-icon">🇵🇰</span> Made in Pakistan</div>
-    <div class="trust-item"><span class="trust-icon">🧴</span> Hand-bottled in small batches</div>
-    <div class="trust-item"><span class="trust-icon">🚚</span> Cash on Delivery available</div>
-    <div class="trust-item"><span class="trust-icon">↩</span> Easy 7-day returns</div>
-  </div>
-</section>
-`;
-}
-
 function injectFooterAndModals(){
   const el = document.getElementById('site-footer-modals');
   if(!el) return;
@@ -161,5 +146,4 @@ function injectFooterAndModals(){
 }
 
 injectHeader();
-injectTrustBar();
 injectFooterAndModals();

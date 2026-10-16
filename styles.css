@@ -249,7 +249,7 @@
     transition:transform .25s ease, background .25s ease, border-color .25s ease;
   }
   .btn:hover{transform:translateY(-2px);}
-  .btn-primary{background:var(--gold); color:#fff; box-shadow:0 0 0 rgba(184,137,74,0); animation:btnGlow 3.2s ease-in-out infinite;}
+  .btn-primary{background:var(--gold); color:#fff; box-shadow:0 4px 14px rgba(184,137,74,.22);}
   @keyframes btnGlow{
     0%,100%{box-shadow:0 4px 14px rgba(184,137,74,0.25);}
     50%{box-shadow:0 6px 24px rgba(184,137,74,0.45);}
@@ -822,28 +822,6 @@
 .related{padding:0 28px 100px; max-width:1180px; margin:0 auto;}
 .related h2{font-family:var(--serif); font-weight:400; font-size:1.6rem; margin-bottom:28px; text-align:center;}
 
-/* ---------- TRUST BAR ---------- */
-.trust-bar{
-  border-bottom:1px solid var(--line);
-  background:var(--bg-elev-2);
-  padding:16px 28px;
-}
-.trust-bar-inner{
-  max-width:1180px; margin:0 auto;
-  display:flex; justify-content:center; flex-wrap:wrap;
-  gap:14px 36px;
-}
-.trust-item{
-  display:inline-flex; align-items:center; gap:8px;
-  font-size:13px; color:var(--text-muted); font-weight:500;
-  white-space:nowrap;
-}
-.trust-icon{font-size:15px; line-height:1;}
-@media (max-width:640px){
-  .trust-bar-inner{gap:10px 20px;}
-  .trust-item{font-size:12px;}
-}
-
 /* ---------- FAQ ACCORDION ---------- */
 .faq-wrap{max-width:760px; margin:0 auto; padding:20px 28px 110px;}
 .faq-item{
@@ -1016,3 +994,28 @@
 }
 .socials a:hover{color:#fff; background:var(--gold); border-color:var(--gold); transform:translateY(-2px);}
 .socials-brand{margin:18px 0 4px;}
+
+/* keep Add to Cart / View Details aligned across cards of different text length */
+.product-card > a{flex:1 1 auto;}
+.card-actions{margin-top:auto;}
+
+/* ---------- STICKY ORDER BAR (product page, mobile) ---------- */
+.sticky-order{
+  position:fixed; left:0; right:0; bottom:0; z-index:58;
+  display:none; align-items:center; gap:10px;
+  background:rgba(255,255,255,.97); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+  box-shadow:0 -8px 24px rgba(80,60,30,.10);
+  transform:translateY(105%); transition:transform .3s ease;
+}
+.sticky-order.show{transform:translateY(0);}
+.sticky-order .so-info{flex:1; min-width:0; line-height:1.25;}
+.sticky-order .so-name{font-family:var(--serif); font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.sticky-order .so-price{font-size:13px; color:var(--gold-bright); font-weight:600;}
+.sticky-order .btn{padding:12px 16px; font-size:13px; white-space:nowrap;}
+@media (max-width:900px){
+  .sticky-order{display:flex;}
+  body.has-sticky-order{padding-bottom:84px;}
+  body.has-sticky-order .whatsapp-float{display:none;}
+}

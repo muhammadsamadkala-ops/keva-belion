@@ -218,31 +218,6 @@ if(newsletterForm){
   });
 }
 
-// ---------- CURSOR GLOW ----------
-const cursorGlow = document.getElementById('cursorGlow');
-const heroSection = document.querySelector('.hero');
-if(cursorGlow && heroSection && !window.matchMedia('(max-width:900px)').matches){
-  heroSection.addEventListener('mousemove', (e)=>{
-    const rect = heroSection.getBoundingClientRect();
-    cursorGlow.style.left = (e.clientX - rect.left) + 'px';
-    cursorGlow.style.top = (e.clientY - rect.top) + 'px';
-  });
-}
-
-// ---------- SPARKLES ----------
-const sparkleWrap = document.getElementById('sparkles');
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if(sparkleWrap && !reduceMotion){
-  for(let i=0;i<22;i++){
-    const s = document.createElement('i');
-    s.style.left = Math.random()*100 + '%';
-    s.style.top = Math.random()*70 + '%';
-    s.style.animationDelay = (Math.random()*3.4) + 's';
-    s.style.animationDuration = (2.6 + Math.random()*2.4) + 's';
-    sparkleWrap.appendChild(s);
-  }
-}
-
 // ---------- SCROLL REVEAL ----------
 function initScrollReveal(){
   const revealEls = document.querySelectorAll('.reveal');
