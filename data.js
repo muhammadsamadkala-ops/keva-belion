@@ -18,7 +18,7 @@ const PRODUCTS = [
   {id:'noir', name:'Noir', notes:'Oud · Amber · Spice', price:8900, image:'assets/products/noir.jpg',
    gender:'men', family:'woody', intensity:'bold',
    desc:'Our darkest, most commanding scent. Smoky oud and warm amber wrapped in a spiced base — bold enough for winter nights, refined enough for daily wear.'},
-  {id:'blanc', name:'Blanc', notes:'White Florals · Musk', price:7200, compareAtPrice:8000, image:'assets/products/blanc.jpg',
+  {id:'blanc', name:'Blanc', notes:'White Florals · Musk', price:7200, image:'assets/products/blanc.jpg',
    gender:'women', family:'floral', intensity:'light',
    desc:'A luminous white-floral built around jasmine and clean musk. Soft, confident, and easy to wear from morning to evening.'},
   {id:'ocean', name:'Ocean', notes:'Marine · Citrus · Ambergris', price:7800, image:'assets/products/ocean.jpg',
@@ -27,13 +27,13 @@ const PRODUCTS = [
   {id:'rouge', name:'Rouge', notes:'Rose · Berries · Spice', price:8200, image:'assets/products/rouge.jpg',
    gender:'women', family:'floral', intensity:'bold',
    desc:'Deep rose and dark berries warmed with a touch of spice. Romantic and rich — one for evenings and special occasions.'},
-  {id:'vert', name:'Vert', notes:'Green Notes · Fig · Vetiver', price:7500, compareAtPrice:8300, image:'assets/products/vert.jpg',
+  {id:'vert', name:'Vert', notes:'Green Notes · Fig · Vetiver', price:7500, image:'assets/products/vert.jpg',
    gender:'unisex', family:'fresh', intensity:'light',
    desc:'Crisp green notes and fig, grounded in earthy vetiver. Clean, natural, and quietly confident — our take on a modern green scent.'},
   {id:'amber', name:'Amber', notes:'Amber · Vanilla · Woods', price:8500, image:'assets/products/amber.jpg',
    gender:'unisex', family:'sweet', intensity:'bold',
    desc:'Warm amber and soft vanilla over a woody base. Cosy and enveloping — a natural fit for evenings.'},
-  {id:'fleur', name:'Fleur', notes:'Peony · Pink Florals · Musk', price:7400, compareAtPrice:8200, image:'assets/products/fleur.jpg',
+  {id:'fleur', name:'Fleur', notes:'Peony · Pink Florals · Musk', price:7400, image:'assets/products/fleur.jpg',
    gender:'women', family:'floral', intensity:'light',
    desc:'Soft peony and pink florals over a gentle musk base. Light, romantic, and effortless — an everyday floral that never feels heavy.'},
   {id:'elegance', name:'Élégance', notes:'Iris · White Musk · Woods', price:9200, image:'assets/products/elegance.jpg',
@@ -45,7 +45,7 @@ const INSPIRED = [
   {id:'sauvagenoir', name:'Sauvage Noir', inspiredBy:'Dior Sauvage', notes:'Bergamot · Ambroxan', price:5500,
    gender:'men', family:'fresh', intensity:'bold',
    desc:'Our interpretation of the modern fresh-spicy classic — sharp bergamot up top, settling into a clean, radiant ambroxan base. Versatile and easy to wear.'},
-  {id:'bleuele', short:'Citrus and aromatic woods — clean, sharp and office-friendly.', name:'Bleu Elegance', inspiredBy:'Chanel Bleu de Chanel', notes:'Citrus · Woods', price:5500, compareAtPrice:6200,
+  {id:'bleuele', short:'Citrus and aromatic woods — clean, sharp and office-friendly.', name:'Bleu Elegance', inspiredBy:'Chanel Bleu de Chanel', notes:'Citrus · Woods', price:5500,
    gender:'men', family:'fresh', intensity:'bold',
    desc:'Citrus and aromatic woods in a clean, confident composition inspired by one of the most iconic men\'s fragrances. Sharp, elegant, and office-appropriate.'},
   {id:'oudreserve', name:'Oud Wood Reserve', inspiredBy:'Tom Ford Oud Wood', notes:'Oud · Sandalwood', price:6500,
@@ -57,7 +57,7 @@ const INSPIRED = [
   {id:'baccbloom', name:'Baccarat Bloom', inspiredBy:'MFK Baccarat Rouge 540', notes:'Saffron · Amber', price:6900,
    gender:'unisex', family:'sweet', intensity:'bold',
    desc:'Saffron, amber and a crystalline musk base — our tribute to one of the most talked-about niche fragrances of the decade.'},
-  {id:'aventusn', name:'Aventus Noir', inspiredBy:'Creed Aventus', notes:'Pineapple · Birch', price:6900, compareAtPrice:7600,
+  {id:'aventusn', name:'Aventus Noir', inspiredBy:'Creed Aventus', notes:'Pineapple · Birch', price:6900,
    gender:'men', family:'fresh', intensity:'bold',
    desc:'Fruity top notes over smoky birch and musk — inspired by the fragrance that changed how the world thinks about "confidence in a bottle".'},
 ];
@@ -91,6 +91,11 @@ const INTENSITY_LABEL = {light:'Light — everyday', bold:'Bold — statement'};
 
 function getProductById(id){
   return ALL_PRODUCTS.find(p=>p.id===id);
+}
+
+// Each product has its own static page, e.g. noir-eau-de-parfum.html
+function productUrl(p){
+  return p.id + '-eau-de-parfum.html';
 }
 
 // inject dynamic liquid-fill CSS rules once per page
@@ -141,7 +146,7 @@ function renderProductCard(p, container){
   const visual = bottleVisualHTML(p);
   const priceBlock = priceHTML(p);
   card.innerHTML = `
-    <a href="product.html?id=${p.id}" class="card-media-link">
+    <a href="${productUrl(p)}" class="card-media-link">
       ${visual}
       ${p.inspiredBy ? `<div class="inspired-tag">Inspired by ${p.inspiredBy}</div>` : ''}
       <h3>${p.name}</h3>
@@ -151,7 +156,7 @@ function renderProductCard(p, container){
       ${priceBlock}
     </a>
     <div class="card-actions">
-      <a href="product.html?id=${p.id}" class="view-details-btn">View Details</a>
+      <a href="${productUrl(p)}" class="view-details-btn">View Details</a>
       <button class="add-btn" data-id="${p.id}">Add to Cart</button>
     </div>
   `;
@@ -177,7 +182,7 @@ Name: ${c.name || ''}
 Phone: ${c.phone || ''}
 Address: ${c.address || ''}
 City: ${c.city || ''}
-Payment: Cash on Delivery`;
+${c.gift ? 'Gift: Yes' + (c.giftMessage ? ' — message: "' + c.giftMessage + '"' : '') + '\n' : ''}Payment: Cash on Delivery`;
   return `${WA_BASE}?text=${encodeURIComponent(msg)}`;
 }
 

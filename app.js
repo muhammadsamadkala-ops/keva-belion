@@ -125,6 +125,10 @@ function checkoutFormHTML(){
         <label for="fcity">City</label>
         <input type="text" id="fcity" required placeholder="Karachi">
       </div>
+      <div class="field gift-field">
+        <label class="gift-check"><input type="checkbox" id="fgift"> This order is a gift</label>
+        <textarea id="fgiftmsg" rows="2" maxlength="200" placeholder="Message for the recipient (optional)" hidden></textarea>
+      </div>
       <div class="field">
         <label>Payment method</label>
         <div class="pay-options">
@@ -151,6 +155,10 @@ function openCheckout(){
 
   modalBox.querySelector('#checkoutCloseBtn').addEventListener('click', closeCheckout);
 
+  const giftBox = modalBox.querySelector('#fgift');
+  const giftMsg = modalBox.querySelector('#fgiftmsg');
+  giftBox.addEventListener('change', ()=>{ giftMsg.hidden = !giftBox.checked; });
+
   modalBox.querySelector('#checkoutForm').addEventListener('submit', e=>{
     e.preventDefault();
     const customer = {
@@ -158,6 +166,8 @@ function openCheckout(){
       phone: modalBox.querySelector('#fphone').value.trim(),
       address: modalBox.querySelector('#faddress').value.trim(),
       city: modalBox.querySelector('#fcity').value.trim(),
+      gift: modalBox.querySelector('#fgift').checked,
+      giftMessage: modalBox.querySelector('#fgiftmsg').value.trim(),
     };
     const items = cart.map(i => ({name:i.name, price:i.price, qty:i.qty}));
     const total = cartTotal();
@@ -208,15 +218,54 @@ if(checkoutBtnEl){
 
 renderCart();
 
-// ---------- NEWSLETTER ----------
-const newsletterForm = document.getElementById('newsletterForm');
-if(newsletterForm){
-  newsletterForm.addEventListener('submit', e=>{
+// ---------- EMAIL UPDATES SIGNUP ----------
+(function(){
+  const form = document.getElementById('newsletterForm');
+  if(!form) return;
+  const input = document.getElementById('newsletterEmail');
+  const btn = document.getElementById('newsletterBtn');
+  const msg = document.getElementById('newsletterMsg');
+  function show(text, kind){
+    msg.textContent = text;
+    msg.className = 'newsletter-msg show ' + (kind || '');
+  }
+  form.addEventListener('submit', async (e)=>{
     e.preventDefault();
-    document.getElementById('newsletterMsg').classList.add('show');
-    newsletterForm.reset();
+    const email = input.value.trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
+      show('Please enter a valid email address.', 'error');
+      input.focus();
+      return;
+    }
+    btn.disabled = true; const label = btn.textContent; btn.textContent = 'Subscribing…';
+    try{
+      const res = await fetch(SUBSCRIBE_ENDPOINT, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json', 'Accept':'application/json'},
+        body: JSON.stringify({
+          email: email,
+          _honey: document.getElementById('newsletterHoney').value,
+          _subject: 'New Kiva Belion subscriber',
+          _template: 'table',
+          _captcha: 'false',
+          _autoresponse: "Thank you for subscribing to Kiva Belion! We'll email you when new fragrances arrive. To unsubscribe at any time, message us on WhatsApp (" + PHONE_DISPLAY + ") or email " + SUBSCRIBE_EMAIL + ". — Kiva Belion, Karachi",
+          page: location.href
+        })
+      });
+      const data = await res.json().catch(()=>({}));
+      if(res.ok && (data.success === true || data.success === 'true')){
+        form.reset();
+        show("Thank you — you're subscribed. Check your inbox for a welcome email.", 'ok');
+      } else {
+        throw new Error('not ok');
+      }
+    } catch(err){
+      show("Sorry, we couldn't sign you up just now. Please try again, or join our updates on WhatsApp.", 'error');
+    } finally {
+      btn.disabled = false; btn.textContent = label;
+    }
   });
-}
+})();
 
 // ---------- SCROLL REVEAL ----------
 function initScrollReveal(){
@@ -236,19 +285,3 @@ function initScrollReveal(){
   }
 }
 initScrollReveal();
-
-
-// ---------- COMPACT HEADER ON SCROLL ----------
-(function(){
-  const nav = document.querySelector('.site-nav');
-  if(!nav) return;
-  let ticking = false;
-  function update(){
-    nav.classList.toggle('compact', window.scrollY > 60);
-    ticking = false;
-  }
-  window.addEventListener('scroll', ()=>{
-    if(!ticking){ window.requestAnimationFrame(update); ticking = true; }
-  }, {passive:true});
-  update();
-})();

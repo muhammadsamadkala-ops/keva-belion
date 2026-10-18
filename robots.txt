@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://muhammadsamadkala-ops.github.io/keva-belion/sitemap.xml

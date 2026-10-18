@@ -3,6 +3,11 @@ const WHATSAPP_NUMBER = '923702203020';      // country code + number, no + or s
 const PHONE_DISPLAY   = '0370 2203020';      // how the number is shown on the site
 const WA_BASE = 'https://wa.me/' + WHATSAPP_NUMBER;
 
+// Email updates: each signup is emailed to the address below, and the subscriber gets an automatic welcome email.
+// (Powered by FormSubmit.co — the FIRST signup sends you a one-time activation email; click its link once.)
+const SUBSCRIBE_EMAIL    = 'kevibelion@gmail.com';
+const SUBSCRIBE_ENDPOINT = 'https://formsubmit.co/ajax/' + SUBSCRIBE_EMAIL;
+
 const SOCIAL = {
   instagram: 'https://instagram.com/kivabelion',
   tiktok:    'https://www.tiktok.com/@kivabelion',
@@ -64,15 +69,17 @@ function injectFooterAndModals(){
   const el = document.getElementById('site-footer-modals');
   if(!el) return;
   el.outerHTML = `
-<!-- NEWSLETTER -->
+<!-- EMAIL UPDATES -->
 <section class="newsletter">
   <h3>Stay in the loop</h3>
-  <p>New launches, restocks, and small-batch drops — no spam, just scent.</p>
-  <form class="newsletter-form" id="newsletterForm">
-    <input type="email" required placeholder="Your email address" id="newsletterEmail">
-    <button type="submit" class="btn btn-primary">Subscribe</button>
+  <p>New fragrances and restocks, straight to your inbox.</p>
+  <form class="newsletter-form" id="newsletterForm" novalidate>
+    <input type="email" required placeholder="Your email address" id="newsletterEmail" autocomplete="email" aria-label="Email address">
+    <input type="text" name="_honey" id="newsletterHoney" tabindex="-1" autocomplete="off" style="position:absolute; left:-9999px; opacity:0; height:0; width:0;" aria-hidden="true">
+    <button type="submit" class="btn btn-primary" id="newsletterBtn">Subscribe</button>
   </form>
-  <div class="newsletter-msg" id="newsletterMsg">Thank you — you're on the list.</div>
+  <div class="newsletter-msg" id="newsletterMsg" role="status" aria-live="polite"></div>
+  <p class="newsletter-fine">We'll only use your email to send Kiva Belion updates. <a href="privacy.html">Privacy</a> · Prefer WhatsApp? <a id="updatesWaBtn" href="${WA_BASE}?text=${encodeURIComponent('Hi Kiva Belion! Please add me to your updates list.')}" target="_blank" rel="noopener">Join there instead</a>.</p>
 </section>
 
 <a class="whatsapp-float" href="${WA_BASE}" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
@@ -103,6 +110,8 @@ function injectFooterAndModals(){
         <li><a href="returns.html">Shipping &amp; returns</a></li>
         <li><a href="quiz.html">Find your scent</a></li>
         <li><a href="faq.html">FAQs</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms of Service</a></li>
       </ul>
     </div>
     <div>
