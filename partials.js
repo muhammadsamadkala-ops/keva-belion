@@ -6,6 +6,14 @@ const WA_BASE = 'https://wa.me/' + WHATSAPP_NUMBER;
 // Email updates: each signup is emailed to the address below, and the subscriber gets an automatic welcome email.
 // (Powered by FormSubmit.co — the FIRST signup sends you a one-time activation email; click its link once.)
 const SUBSCRIBE_EMAIL    = 'kevibelion@gmail.com';
+
+// The "Inspired by" collection is hidden until its real products, prices and photos are confirmed.
+// Set to true only when those are ready (the pages must be restored too — ask for help).
+const SHOW_INSPIRED = false;
+
+// PREVIEW MODE: while false, the site shows a "samples only" banner and ordering is switched off
+// (buttons say "Coming soon"). Set to true on launch day, once real products, photos and prices are in.
+const ORDERS_OPEN = false;
 const SUBSCRIBE_ENDPOINT = 'https://formsubmit.co/ajax/' + SUBSCRIBE_EMAIL;
 
 const SOCIAL = {
@@ -40,6 +48,7 @@ function injectHeader(){
   const el = document.getElementById('site-header');
   if(!el) return;
   el.outerHTML = `
+${ORDERS_OPEN ? '' : `<div class="preview-bar" role="note">Preview — the products, photos and prices shown are samples. Orders open soon. <a href="${WA_BASE}?text=${encodeURIComponent('Hi Kiva Belion! Please let me know when you launch.')}" target="_blank" rel="noopener">Get notified on WhatsApp</a></div>`}
 <header class="site-nav">
   <div class="nav-inner">
     <a href="index.html" class="logo-chip" aria-label="Kiva Belion home">
@@ -48,7 +57,7 @@ function injectHeader(){
     <nav class="nav-links" id="navLinks">
       <a href="index.html">Home</a>
       <a href="signature-collection.html">Collection</a>
-      <a href="inspired-collection.html">Inspired</a>
+      ${SHOW_INSPIRED ? '<a href="inspired-collection.html">Inspired</a>' : ''}
       <a href="quiz.html">Find Your Scent</a>
       <a href="index.html#about">About</a>
       <a href="faq.html">FAQs</a>
@@ -91,7 +100,7 @@ function injectFooterAndModals(){
   <div class="footer-grid">
     <div class="footer-brand">
       <span class="logo-chip"><img src="assets/logo.png" alt="Kiva Belion"></span>
-      <p>Small-batch eau de parfums made and finished by hand in Karachi, Pakistan.</p>
+      <p>Eau de parfums made by us in Karachi, Pakistan.</p>
       <div class="socials socials-brand">${socialLinksHTML()}</div>
       <div class="payment-note"><span class="dot"></span> Cash on Delivery &amp; WhatsApp orders</div>
     </div>
@@ -99,7 +108,7 @@ function injectFooterAndModals(){
       <h4>Shop</h4>
       <ul>
         <li><a href="signature-collection.html">Signature Collection</a></li>
-        <li><a href="inspired-collection.html">Inspired by Icons</a></li>
+        ${SHOW_INSPIRED ? '<li><a href="inspired-collection.html">Inspired by Icons</a></li>' : ''}
         <li><a href="index.html#about">Our story</a></li>
         <li><a href="index.html">Home</a></li>
       </ul>

@@ -1039,3 +1039,17 @@
 .newsletter .newsletter-fine{font-size:12px; color:var(--text-muted); margin:16px auto 0; max-width:460px; line-height:1.6;}
 .newsletter .newsletter-fine a{color:var(--gold-bright); text-decoration:underline; text-underline-offset:2px;}
 .newsletter .newsletter-form + .newsletter-msg{margin-bottom:0;}
+
+/* ---------- SOLD OUT ---------- */
+.sold-badge{background:var(--text-muted);}
+.add-btn[disabled]{opacity:.55; cursor:not-allowed; background:var(--bg); border-color:var(--line); color:var(--text-muted);}
+.add-btn[disabled]:hover{background:var(--bg); color:var(--text-muted); border-color:var(--line);}
+.detail-add-btn[disabled]{opacity:.55; cursor:not-allowed; box-shadow:none;}
+
+/* ---------- PREVIEW BAR (shown while ORDERS_OPEN is false) ---------- */
+.preview-bar{
+  background:var(--bg-elev-2); color:var(--text-muted);
+  border-bottom:1px solid var(--line);
+  font-size:12.5px; line-height:1.5; text-align:center; padding:8px 16px;
+}
+.preview-bar a{color:var(--gold-bright); text-decoration:underline; text-underline-offset:2px; white-space:nowrap;}

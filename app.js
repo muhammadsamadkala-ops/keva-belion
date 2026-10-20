@@ -18,7 +18,7 @@ function addToCart(id, qty){
   const existing = cart.find(i=>i.id===id);
   if(existing){ existing.qty += qty; } else {
     const p = getProductById(id);
-    if(!p) return;
+    if(!p || orderState(p) !== 'ok') return;
     cart.push({...p, qty:qty});
   }
   renderCart();

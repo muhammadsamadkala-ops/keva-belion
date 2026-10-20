@@ -62,7 +62,7 @@ const INSPIRED = [
    desc:'Fruity top notes over smoky birch and musk — inspired by the fragrance that changed how the world thinks about "confidence in a bottle".'},
 ];
 
-const ALL_PRODUCTS = PRODUCTS.concat(INSPIRED);
+const ALL_PRODUCTS = PRODUCTS.concat(SHOW_INSPIRED ? INSPIRED : []);   // SHOW_INSPIRED lives in partials.js
 
 /* ============ FRAGRANCE PYRAMID (Top / Heart / Base) ============
    NOTE FOR OWNER: these are working notes derived from each scent's description.
@@ -93,6 +93,12 @@ function getProductById(id){
   return ALL_PRODUCTS.find(p=>p.id===id);
 }
 
+// 'ok' = can be ordered, 'soon' = site is in preview mode, 'sold' = marked soldOut:true
+function orderState(p){
+  if(!ORDERS_OPEN) return 'soon';
+  return p.soldOut ? 'sold' : 'ok';
+}
+
 // Each product has its own static page, e.g. noir-eau-de-parfum.html
 function productUrl(p){
   return p.id + '-eau-de-parfum.html';
@@ -110,7 +116,10 @@ function productUrl(p){
 })();
 
 function bottleVisualHTML(p){
-  const badge = p.compareAtPrice ? `<div class="sale-badge">Sale</div>` : '';
+  const st = orderState(p);
+  const badge = st === 'soon' ? `<div class="sale-badge sold-badge">Coming soon</div>`
+              : st === 'sold' ? `<div class="sale-badge sold-badge">Sold out</div>`
+              : (p.compareAtPrice ? `<div class="sale-badge">Sale</div>` : '');
   if(p.image){
     return `<div class="bottle-wrap photo-wrap">${badge}<img src="${p.image}" alt="${p.name}" loading="lazy"></div>`;
   }
@@ -157,7 +166,7 @@ function renderProductCard(p, container){
     </a>
     <div class="card-actions">
       <a href="${productUrl(p)}" class="view-details-btn">View Details</a>
-      <button class="add-btn" data-id="${p.id}">Add to Cart</button>
+      ${orderState(p) === 'ok' ? `<button class="add-btn" data-id="${p.id}">Add to Cart</button>` : `<button class="add-btn" disabled>${orderState(p) === 'soon' ? 'Coming soon' : 'Sold out'}</button>`}
     </div>
   `;
   container.appendChild(card);

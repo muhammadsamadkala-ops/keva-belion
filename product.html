@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title id="pageTitle">Product — Kiva Belion</title>
-<meta name="description" content="Shop small-batch eau de parfum from Kiva Belion.">
+<meta name="description" content="Eau de parfum made by Kiva Belion in Karachi.">
 <meta name="theme-color" content="#faf5ec">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48.png">
@@ -12,7 +13,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Kiva Belion">
 <meta property="og:title" content="Product — Kiva Belion">
-<meta property="og:description" content="Shop small-batch eau de parfum from Kiva Belion.">
+<meta property="og:description" content="Eau de parfum made by Kiva Belion in Karachi.">
 <meta property="og:image" content="https://muhammadsamadkala-ops.github.io/keva-belion/assets/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -21,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261021a">
+<link rel="stylesheet" href="styles.css?v=20261023a">
 </head>
 <body>
 
@@ -45,8 +46,8 @@
 
 <div id="site-footer-modals"></div>
 
-<script src="partials.js?v=20261021a"></script>
-<script src="data.js?v=20261021a"></script>
+<script src="partials.js?v=20261023a"></script>
+<script src="data.js?v=20261023a"></script>
 <script>
   const params = new URLSearchParams(window.location.search);
   const id = params.get('id');
@@ -67,6 +68,8 @@
     const collectionHref = product.inspiredBy ? 'inspired-collection.html' : 'signature-collection.html';
     const collectionLabel = product.inspiredBy ? 'Inspired by Icons' : 'Signature Collection';
 
+    const st = orderState(product);
+    const sold = st !== 'ok';
     const pyr = product.pyramid;
     const pyramidHTML = pyr ? `
       <div class="pyramid">
@@ -102,18 +105,18 @@
           <p class="desc">${product.desc || ''}</p>
           ${profileHTML}
           ${pyramidHTML}
-          <div class="qty-select-row">
+          <div class="qty-select-row" ${sold ? 'style="display:none"' : ''}>
             <button class="qty-btn" id="detailQtyMinus" aria-label="Decrease quantity">−</button>
             <span class="qty-val" id="detailQtyVal">1</span>
             <button class="qty-btn" id="detailQtyPlus" aria-label="Increase quantity">+</button>
           </div>
           <div class="detail-actions">
-            <button class="btn btn-primary detail-add-btn" id="detailAddBtn">Add to Cart</button>
-            <a class="btn btn-whatsapp detail-wa-btn" id="detailWaBtn" href="#" target="_blank" rel="noopener">Order via WhatsApp</a>
+            <button class="btn btn-primary detail-add-btn" id="detailAddBtn" ${sold ? 'disabled' : ''}>${sold ? (st === 'soon' ? 'Coming soon' : 'Sold out') : 'Add to Cart'}</button>
+            <a class="btn btn-whatsapp detail-wa-btn" id="detailWaBtn" href="#" target="_blank" rel="noopener">${sold ? (st === 'soon' ? 'Notify me on WhatsApp' : "Ask when it's back") : 'Order via WhatsApp'}</a>
           </div>
           <div class="detail-meta">
             <div><span class="dot"></span> Cash on Delivery, or order directly on WhatsApp</div>
-            <div><span class="dot"></span> Formulated and hand-bottled in Karachi</div>
+            <div><span class="dot"></span> Made by us in Karachi</div>
             <div><span class="dot"></span> 7-day returns on unopened bottles — <a href="returns.html" style="text-decoration:underline;">see policy</a></div>
           </div>
         </div>
@@ -128,12 +131,13 @@
     bar.className = 'sticky-order';
     bar.innerHTML = `
       <div class="so-info"><div class="so-name">${product.name}</div><div class="so-price">PKR ${product.price.toLocaleString()}</div></div>
-      <button class="btn btn-ghost" id="soAdd">Add</button>
-      <a class="btn btn-whatsapp" id="soWa" href="#" target="_blank" rel="noopener">Order on WhatsApp</a>`;
+      ${sold ? '' : '<button class="btn btn-ghost" id="soAdd">Add</button>'}
+      <a class="btn btn-whatsapp" id="soWa" href="#" target="_blank" rel="noopener">${sold ? (st === 'soon' ? 'Notify me' : "Ask when it's back") : 'Order on WhatsApp'}</a>`;
     document.body.appendChild(bar);
     document.body.classList.add('has-sticky-order');
     const soWa = bar.querySelector('#soWa');
-    bar.querySelector('#soAdd').addEventListener('click', (e)=>{
+    const soAdd = bar.querySelector('#soAdd');
+    if(soAdd) soAdd.addEventListener('click', (e)=>{
       addToCart(product.id, qty);
       e.target.textContent = 'Added ✓';
       setTimeout(()=>{ e.target.textContent = 'Add'; }, 1200);
@@ -147,7 +151,11 @@
     }
 
     function refreshWa(){
-      const url = buildWhatsAppOrderUrl([{name:product.name, price:product.price, qty:qty}]);
+      const url = sold
+        ? WA_BASE + '?text=' + encodeURIComponent(st === 'soon'
+            ? 'Hi Kiva Belion! Please let me know when ' + product.name + ' is available.'
+            : 'Hi Kiva Belion! Is ' + product.name + ' coming back in stock?')
+        : buildWhatsAppOrderUrl([{name:product.name, price:product.price, qty:qty}]);
       waBtn.href = url;
       soWa.href = url;
     }
@@ -174,6 +182,6 @@
     }
   }
 </script>
-<script src="app.js?v=20261021a"></script>
+<script src="app.js?v=20261023a"></script>
 </body>
 </html>

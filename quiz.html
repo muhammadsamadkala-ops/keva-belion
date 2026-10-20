@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Find Your Scent — Kiva Belion</title>
 <meta name="description" content="Answer a few quick questions and we'll match you to a Kiva Belion fragrance.">
 <meta name="theme-color" content="#faf5ec">
@@ -21,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261021a">
+<link rel="stylesheet" href="styles.css?v=20261023a">
 </head>
 <body>
 
@@ -48,8 +49,8 @@
 
 <div id="site-footer-modals"></div>
 
-<script src="partials.js?v=20261021a"></script>
-<script src="data.js?v=20261021a"></script>
+<script src="partials.js?v=20261023a"></script>
+<script src="data.js?v=20261023a"></script>
 <script>
   const QUIZ_QUESTIONS = [
     {
@@ -126,7 +127,7 @@
   }
 
   function findMatch(){
-    const pool = ALL_PRODUCTS;
+    const pool = ALL_PRODUCTS.filter(p => !p.soldOut);
     const matchesAll = pool.filter(p =>
       (answers.gender === 'unisex' || p.gender === answers.gender || p.gender === 'unisex') &&
       p.family === answers.family &&
@@ -165,13 +166,16 @@
         <p class="quiz-result-desc">${shortDesc(product)}</p>
         ${priceBlock}
         <div class="quiz-result-actions">
-          <button class="btn btn-primary" id="quizAddBtn" data-id="${product.id}">Add to bag</button>
+          ${orderState(product) === 'ok'
+            ? `<button class="btn btn-primary" id="quizAddBtn" data-id="${product.id}">Add to bag</button>`
+            : `<a class="btn btn-whatsapp" href="${WA_BASE}?text=${encodeURIComponent('Hi Kiva Belion! Please let me know when ' + product.name + ' is available.')}" target="_blank" rel="noopener">Notify me on WhatsApp</a>`}
           <a class="btn btn-ghost" href="${productUrl(product)}">View details</a>
         </div>
         <span class="quiz-restart" id="quizRestart">Start over</span>
       </div>
     `;
-    document.getElementById('quizAddBtn').addEventListener('click', (e)=>{
+    const quizAdd = document.getElementById('quizAddBtn');
+    if(quizAdd) quizAdd.addEventListener('click', (e)=>{
       addToCart(product.id);
       e.target.textContent = 'Added ✓';
       setTimeout(()=>{ e.target.textContent = 'Add to bag'; }, 1400);
@@ -185,6 +189,6 @@
 
   renderQuestion();
 </script>
-<script src="app.js?v=20261021a"></script>
+<script src="app.js?v=20261023a"></script>
 </body>
 </html>

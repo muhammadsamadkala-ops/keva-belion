@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
 <title>Kiva Belion — Eau de Parfum</title>
 <meta name="description" content="Kiva Belion — eau de parfums made in Karachi. We mix and bottle everything ourselves.">
 <meta name="theme-color" content="#faf5ec">
@@ -23,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261021a">
+<link rel="stylesheet" href="styles.css?v=20261023a">
 </head>
 <body>
 
@@ -48,7 +49,7 @@
     <div class="hero-video-overlay"></div>
   </div>
   <div class="hero-content">
-    <span class="eyebrow-pill"><span class="pulse-dot"></span> Small-batch · Made in Pakistan</span>
+    <span class="eyebrow-pill"><span class="pulse-dot"></span> Made in Karachi, Pakistan</span>
     <h1>Fragrance as identity,<br><span class="glow-line">not accessory.</span></h1>
     <p class="lede">We make every fragrance ourselves, here in Karachi. It's not outsourced, and it's not someone else's formula with our name stuck on the bottle.</p>
 
@@ -90,12 +91,12 @@
   <div class="about-grid">
     <div class="about-copy reveal">
       <h2>How we work</h2>
-      <p>We mix, test and bottle everything ourselves in Karachi. Nothing here is bought in bulk from a supplier and relabeled with our name.</p>
-      <p>There are eight scents right now, with more in progress. We only put one up once it's actually ready — not on a schedule, and not just to hit a number.</p>
+      <p>We make every fragrance ourselves in Karachi. Nothing here is bought in bulk from a supplier and relabeled with our name.</p>
+      <p>There are eight scents in the collection right now, and more are on the way.</p>
       <div class="about-stats reveal-stagger">
         <div class="reveal"><strong>8</strong><span>Scents right now</span></div>
-        <div class="reveal"><strong>100%</strong><span>Hand-bottled by us</span></div>
-        <div class="reveal"><strong>7 days</strong><span>Easy returns</span></div>
+        <div class="reveal"><strong>100%</strong><span>Made by us</span></div>
+        <div class="reveal"><strong>7 days</strong><span>Returns on unopened bottles</span></div>
       </div>
     </div>
     <div class="about-visual">
@@ -120,8 +121,8 @@
     </article>
     <article class="why-card reveal">
       <div class="why-icon"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
-      <h3>Honest about inspiration</h3>
-      <p>Where a scent is inspired by a well-known fragrance, we say so clearly. It is our own formula, never passed off as the original.</p>
+      <h3>Talk to us directly</h3>
+      <p>Not sure which scent to pick? Message us on WhatsApp and ask — you'll be talking to us, not a call centre.</p>
     </article>
     <article class="why-card reveal">
       <div class="why-icon"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.4 7.5L3 21l1.6-5.4A8.5 8.5 0 1 1 21 12z"/></svg></div>
@@ -140,7 +141,7 @@
 <section class="journey" id="journey">
   <div class="journey-head reveal">
     <h2>How it unfolds</h2>
-    <p>A fragrance isn't one smell — it's three, released in sequence. This is how every Kiva Belion scent moves across a day.</p>
+    <p>A fragrance isn't one smell — it's three, released in sequence. Here is how a typical fragrance unfolds on skin.</p>
   </div>
   <div class="journey-grid reveal-stagger">
     <div class="journey-stage reveal">
@@ -195,13 +196,17 @@
 
 <div id="site-footer-modals"></div>
 
-<script src="partials.js?v=20261021a"></script>
-<script src="data.js?v=20261021a"></script>
+<script src="partials.js?v=20261023a"></script>
+<script src="data.js?v=20261023a"></script>
 <script>
   const grid = document.getElementById('productGrid');
   PRODUCTS.forEach(p=>renderProductCard(p, grid, true));
-  const inspiredGrid = document.getElementById('inspiredGrid');
-  INSPIRED.forEach(p=>renderProductCard(p, inspiredGrid, true));
+  const inspiredSection = document.getElementById('inspired');
+  if(SHOW_INSPIRED){
+    INSPIRED.forEach(p=>renderProductCard(p, document.getElementById('inspiredGrid')));
+  } else if(inspiredSection){
+    inspiredSection.remove();
+  }
 </script>
 <script>
   (function renderReviews(){
@@ -226,6 +231,6 @@
       </div>`).join('');
   })();
 </script>
-<script src="app.js?v=20261021a"></script>
+<script src="app.js?v=20261023a"></script>
 </body>
 </html>
