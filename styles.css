@@ -6,6 +6,9 @@
     --gold:#b8894a;
     --gold-bright:#9c6b2e;
     --teal:#0b4a3d;
+    --brand:#054a3d;        /* logo green — used for headings */
+    --brand-soft:#5fd0ae;   /* light tint of the logo green, readable on the dark hero video */
+    --logo-red:#ea3f31;     /* the red dot in the logo */
     --coral:#d94430;
     --text:#2b2420;
     --text-muted:#8a7d6c;
@@ -1053,3 +1056,19 @@
   font-size:12.5px; line-height:1.5; text-align:center; padding:8px 16px;
 }
 .preview-bar a{color:var(--gold-bright); text-decoration:underline; text-underline-offset:2px; white-space:nowrap;}
+
+/* ---------- HEADINGS IN THE LOGO'S COLOURS ---------- */
+h1, h2, h3, h4{color:var(--brand);}
+.footer-grid h4{color:var(--brand);}
+.faq-item summary{color:var(--brand);}
+.faq-item[open] summary::after, .faq-item summary::after{color:var(--logo-red);}
+.why-rule{background:var(--logo-red);}
+.why-icon{color:var(--brand); background:rgba(5,74,61,.08);}
+.why-card:hover{border-color:var(--brand);}
+.pyr-label{color:var(--brand);}
+/* hero sits on a dark video: white heading, light-green accent line */
+.hero.hero-video-active h1{color:#faf6ec;}
+.hero.hero-video-active h1 .glow-line{color:var(--brand-soft);}
+
+/* "Coming soon" / "Sold out" badge sits at the bottom of the photo so it doesn't cover the bottle cap */
+.sale-badge.sold-badge{top:auto; bottom:8px; left:50%; transform:translateX(-50%); white-space:nowrap;}
