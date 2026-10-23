@@ -11,6 +11,10 @@ const SUBSCRIBE_EMAIL    = 'kevibelion@gmail.com';
 // Set to true only when those are ready (the pages must be restored too — ask for help).
 const SHOW_INSPIRED = false;
 
+// The "Fragrance notes" pyramid (Top / Heart / Base) on product pages stays hidden until the real, verified
+// notes for each scent have been entered in PYRAMIDS (data.js). Set to true only after that.
+const SHOW_FRAGRANCE_PYRAMID = false;
+
 // PREVIEW MODE: while false, the site shows a "samples only" banner and ordering is switched off
 // (buttons say "Coming soon"). Set to true on launch day, once real products, photos and prices are in.
 const ORDERS_OPEN = false;

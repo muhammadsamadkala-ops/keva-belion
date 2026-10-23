@@ -66,7 +66,8 @@ const ALL_PRODUCTS = PRODUCTS.concat(SHOW_INSPIRED ? INSPIRED : []);   // SHOW_I
 
 /* ============ FRAGRANCE PYRAMID (Top / Heart / Base) ============
    NOTE FOR OWNER: these are working notes derived from each scent's description.
-   Replace them with your real formula notes before launch. */
+   Replace them with your real formula notes before launch.
+   They are hidden on product pages while SHOW_FRAGRANCE_PYRAMID (partials.js) is false. */
 const PYRAMIDS = {
   noir:        {top:['Spice'],          heart:['Oud'],                     base:['Amber']},
   blanc:       {top:['Citrus Zest'],    heart:['Jasmine','White Florals'],  base:['Clean Musk']},
@@ -83,7 +84,7 @@ const PYRAMIDS = {
   baccbloom:   {top:['Saffron'],        heart:['Jasmine'],                  base:['Amber','Musk']},
   aventusn:    {top:['Pineapple'],      heart:['Birch'],                    base:['Musk']},
 };
-ALL_PRODUCTS.forEach(p => { p.pyramid = PYRAMIDS[p.id] || null; });
+ALL_PRODUCTS.forEach(p => { p.pyramid = SHOW_FRAGRANCE_PYRAMID ? (PYRAMIDS[p.id] || null) : null; });
 
 const FAMILY_LABEL = {fresh:'Fresh', floral:'Floral', sweet:'Warm & Sweet', woody:'Woody'};
 const GENDER_LABEL = {men:'For him', women:'For her', unisex:'Unisex'};

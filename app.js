@@ -10,28 +10,89 @@ document.querySelectorAll('.carousel-arrow').forEach(btn=>{
   });
 });
 
-// ---------- CART STATE (in-memory only, shared across page via localStorage-free session) ----------
+// ---------- CART STATE ----------
+// The bag is kept in this browser's localStorage so it survives moving between pages (every page of this
+// site is a separate page load). Only product ids and quantities are saved. Names and prices are always
+// read fresh from data.js, and customer details (name, phone, address) are never saved.
+const CART_STORAGE_KEY = 'kivabelion.cart.v1';
+const CART_MAX_QTY = 99;   // sanity guard against corrupt data, not a shop rule
 let cart = [];
 
+// Browsers can block or fill storage (private mode, site settings), so every access is guarded.
+// If storage does not work, the bag still works in memory for the current page.
+const cartStorageOk = (function probeCartStorage(){
+  try{
+    const k = '__kb_probe__';
+    window.localStorage.setItem(k, '1');
+    window.localStorage.removeItem(k);
+    return true;
+  } catch(e){ return false; }
+})();
+
+// Returns the saved bag as full product objects, or null when storage cannot be read
+// (in that case the caller keeps the bag it already has in memory).
+function readStoredCart(){
+  if(!cartStorageOk) return null;
+  let raw;
+  try{ raw = window.localStorage.getItem(CART_STORAGE_KEY); } catch(e){ return null; }
+  if(!raw) return [];
+  let data;
+  try{ data = JSON.parse(raw); } catch(e){ return []; }
+  if(!data || data.v !== 1 || !Array.isArray(data.items)) return [];
+  const items = [];
+  data.items.forEach(entry=>{
+    if(!entry || typeof entry.id !== 'string') return;
+    const p = getProductById(entry.id);                 // only known, orderable products are accepted
+    if(!p || orderState(p) !== 'ok') return;
+    if(items.some(i=>i.id===p.id)) return;              // ignore duplicates
+    const qty = Math.floor(Number(entry.qty));
+    if(!Number.isFinite(qty) || qty < 1) return;
+    items.push({...p, qty: Math.min(qty, CART_MAX_QTY)});
+  });
+  return items;
+}
+function saveCart(){
+  if(!cartStorageOk) return;
+  try{
+    if(cart.length === 0){
+      window.localStorage.removeItem(CART_STORAGE_KEY);
+    } else {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({v:1, items: cart.map(i=>({id:i.id, qty:i.qty}))}));
+    }
+  } catch(e){ /* storage full or blocked: keep working in memory */ }
+}
+// Re-read the saved bag so a change made in another tab is never overwritten by an out-of-date copy.
+function syncCartFromStorage(){
+  const stored = readStoredCart();
+  if(stored) cart = stored;
+}
+
 function addToCart(id, qty){
-  qty = qty || 1;
+  qty = Math.floor(Number(qty)) || 1;
+  if(qty < 1) qty = 1;
+  syncCartFromStorage();
   const existing = cart.find(i=>i.id===id);
-  if(existing){ existing.qty += qty; } else {
+  if(existing){ existing.qty = Math.min(existing.qty + qty, CART_MAX_QTY); } else {
     const p = getProductById(id);
     if(!p || orderState(p) !== 'ok') return;
-    cart.push({...p, qty:qty});
+    cart.push({...p, qty: Math.min(qty, CART_MAX_QTY)});
   }
+  saveCart();
   renderCart();
 }
 function changeQty(id, delta){
+  syncCartFromStorage();
   const item = cart.find(i=>i.id===id);
-  if(!item) return;
-  item.qty += delta;
+  if(!item){ renderCart(); return; }
+  item.qty = Math.min(item.qty + delta, CART_MAX_QTY);
   if(item.qty<=0){ cart = cart.filter(i=>i.id!==id); }
+  saveCart();
   renderCart();
 }
 function removeItem(id){
+  syncCartFromStorage();
   cart = cart.filter(i=>i.id!==id);
+  saveCart();
   renderCart();
 }
 function cartTotal(){
@@ -148,6 +209,7 @@ function checkoutFormHTML(){
 }
 
 function openCheckout(){
+  syncCartFromStorage();
   if(!checkoutModal || cart.length===0){ return; }
   modalBox.innerHTML = checkoutFormHTML();
   checkoutModal.classList.add('show');
@@ -161,6 +223,9 @@ function openCheckout(){
 
   modalBox.querySelector('#checkoutForm').addEventListener('submit', e=>{
     e.preventDefault();
+    // Use the latest saved bag (it may have changed in another tab). If it is now empty there is nothing to send.
+    syncCartFromStorage();
+    if(cart.length === 0){ closeCheckout(); renderCart(); return; }
     const customer = {
       name: modalBox.querySelector('#fname').value.trim(),
       phone: modalBox.querySelector('#fphone').value.trim(),
@@ -183,11 +248,18 @@ function openCheckout(){
         <p>Total: <strong style="color:var(--gold-bright)">PKR ${total.toLocaleString()}</strong> · Cash on Delivery</p>
         <p style="margin-top:14px;">WhatsApp didn't open? Tap the button below.</p>
         <a class="btn btn-whatsapp" style="margin-top:14px;" href="${waUrl}" target="_blank" rel="noopener">Open WhatsApp</a>
+        <p class="confirm-warning" role="note" style="margin-top:16px; padding:10px 12px; border-left:3px solid var(--coral); background:rgba(217,68,48,.07); color:var(--text); text-align:left; font-size:13.5px;"><strong>Before you tap a button:</strong> tap "I've sent my order" only after you have sent the message in WhatsApp. If you leave without sending it, or without tapping the button, your bag stays saved on this device. Check your bag next time so the same order is not sent twice.</p>
+        <div><button class="btn btn-primary" style="margin-top:12px;" id="sentConfirm">I've sent my order</button></div>
         <div><button class="btn btn-ghost" style="margin-top:12px;" id="closeConfirm">Continue shopping</button></div>
       </div>
     `;
-    cart = [];
-    renderCart();
+    // The bag is kept until the customer says the order was sent. Closing this screen does not clear it.
+    modalBox.querySelector('#sentConfirm').addEventListener('click', ()=>{
+      cart = [];
+      saveCart();
+      renderCart();
+      closeCheckout();
+    });
     modalBox.querySelector('#closeConfirm').addEventListener('click', closeCheckout);
     modalBox.querySelector('#checkoutCloseBtn2').addEventListener('click', closeCheckout);
   });
@@ -216,7 +288,15 @@ if(checkoutBtnEl){
   });
 }
 
+// Load the saved bag (if any) and show it, then keep it in step with other tabs and the back button.
+syncCartFromStorage();
 renderCart();
+window.addEventListener('storage', e=>{
+  if(e.key === null || e.key === CART_STORAGE_KEY){ syncCartFromStorage(); renderCart(); }
+});
+window.addEventListener('pageshow', e=>{
+  if(e.persisted){ syncCartFromStorage(); renderCart(); }
+});
 
 // ---------- EMAIL UPDATES SIGNUP ----------
 (function(){
