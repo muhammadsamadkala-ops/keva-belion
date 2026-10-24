@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261024b">
+<link rel="stylesheet" href="styles.css?v=20261024d">
 </head>
 <body>
 
@@ -47,8 +47,8 @@
 
 <div id="site-footer-modals"></div>
 
-<script src="partials.js?v=20261024b"></script>
-<script src="data.js?v=20261024b"></script>
+<script src="partials.js?v=20261024d"></script>
+<script src="data.js?v=20261024d"></script>
 <script>
   const id = 'rouge';
   const product = getProductById(id);
@@ -108,7 +108,7 @@
             <button class="qty-btn" id="detailQtyPlus" aria-label="Increase quantity">+</button>
           </div>
           <div class="detail-actions">
-            <button class="btn btn-primary detail-add-btn" id="detailAddBtn" ${sold ? 'disabled' : ''}>${sold ? (st === 'soon' ? 'Coming soon' : 'Sold out') : 'Add to Cart'}</button>
+            <button class="btn btn-primary detail-add-btn" id="detailAddBtn" ${sold ? 'disabled' : ''}>${sold ? (st === 'soon' ? 'Coming soon' : 'Sold out') : 'Add to bag'}</button>
             <a class="btn btn-whatsapp detail-wa-btn" id="detailWaBtn" href="#" target="_blank" rel="noopener">${sold ? (st === 'soon' ? 'Notify me on WhatsApp' : "Ask when it's back") : 'Order via WhatsApp'}</a>
           </div>
           <div class="detail-meta">
@@ -166,7 +166,7 @@
     document.getElementById('detailAddBtn').addEventListener('click', (e)=>{
       addToCart(product.id, qty);
       e.target.textContent = 'Added ✓';
-      setTimeout(()=>{ e.target.textContent='Add to Cart'; }, 1400);
+      setTimeout(()=>{ e.target.textContent='Add to bag'; }, 1400);
     });
 
     // Related products: same category, excluding current
@@ -179,6 +179,6 @@
     }
   }
 </script>
-<script src="app.js?v=20261024b"></script>
+<script src="app.js?v=20261024d"></script>
 </body>
 </html>

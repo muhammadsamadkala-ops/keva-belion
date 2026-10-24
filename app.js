@@ -116,10 +116,10 @@ function renderCart(){
           <h5>${i.name}</h5>
           <div class="p">PKR ${(i.price*i.qty).toLocaleString()}</div>
           <div class="qty-row">
-            <button class="qty-btn" onclick="changeQty('${i.id}',-1)">−</button>
+            <button class="qty-btn" aria-label="Decrease quantity of ${i.name}" onclick="changeQty('${i.id}',-1)">−</button>
             <span>${i.qty}</span>
-            <button class="qty-btn" onclick="changeQty('${i.id}',1)">+</button>
-            <a class="remove-link" onclick="removeItem('${i.id}')">Remove</a>
+            <button class="qty-btn" aria-label="Increase quantity of ${i.name}" onclick="changeQty('${i.id}',1)">+</button>
+            <button type="button" class="remove-link" aria-label="Remove ${i.name} from bag" onclick="removeItem('${i.id}')">Remove</button>
           </div>
         </div>
       </div>
@@ -365,3 +365,104 @@ function initScrollReveal(){
   }
 }
 initScrollReveal();
+
+/* ============ MOTION LAYER (small, dependency-free, every part optional) ============ */
+(function(){
+  try{
+    const RM = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const header = document.querySelector('header.site-nav');
+    const hero = document.querySelector('.hero');
+    const video = document.querySelector('.hero-video-wrap video');
+
+    // Visitors who prefer reduced motion do not get an autoplaying background video: the still poster is shown.
+    function stopVideo(){
+      if(!video) return;
+      video.pause(); video.removeAttribute('autoplay');
+      video.querySelectorAll('source').forEach(s=>s.remove());
+      video.load();
+    }
+    if(RM.matches) stopVideo();
+    if(RM.addEventListener) RM.addEventListener('change', e=>{ if(e.matches) stopVideo(); });
+
+    // Header shadow after scrolling, and a few pixels of hero parallax on desktop (rAF-throttled)
+    const fine = window.matchMedia('(min-width: 901px) and (hover: hover)');
+    let ticking = false;
+    function onScroll(){
+      if(ticking) return; ticking = true;
+      requestAnimationFrame(()=>{
+        ticking = false;
+        const y = window.scrollY || 0;
+        if(header) header.classList.toggle('scrolled', y > 8);
+        if(hero && !RM.matches && fine.matches && y < hero.offsetHeight){
+          hero.style.setProperty('--py', Math.min(24, y * 0.06).toFixed(1) + 'px');
+        }
+      });
+    }
+    window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
+
+    if('IntersectionObserver' in window){
+      // pause the hero's CSS animations while the hero is off-screen
+      if(hero) new IntersectionObserver(es=>es.forEach(e=>hero.classList.toggle('is-offscreen', !e.isIntersecting))).observe(hero);
+      // section hairlines
+      const secIO = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in-view'); secIO.unobserve(e.target); } }), {threshold:0.12});
+      document.querySelectorAll('.about, .why, .journey, .reviews, .newsletter').forEach(s=>secIO.observe(s));
+    }
+
+    // "Added" confirmation on the product-page buttons (card buttons already get it from handleAddClick)
+    document.addEventListener('click', e=>{
+      const b = e.target.closest && e.target.closest('#detailAddBtn, #soAdd');
+      if(!b || b.disabled) return;
+      b.classList.add('added');
+      setTimeout(()=>b.classList.remove('added'), 1400);
+    });
+
+    // Bag badge pops and the subtotal fades when they change
+    function watch(id, cls){
+      const el = document.getElementById(id); if(!el) return;
+      new MutationObserver(()=>{
+        el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls);
+      }).observe(el, {childList:true, characterData:true, subtree:true});
+      el.addEventListener('animationend', ()=>el.classList.remove(cls));
+    }
+    watch('cartCount', 'bump'); watch('cartSubtotal', 'tick');
+
+    // Bag drawer: staggered items on open, focus moves in on open and back to the bag button on close
+    const drawer = document.getElementById('cartDrawer');
+    if(drawer){
+      let was = drawer.classList.contains('show');
+      new MutationObserver(()=>{
+        const now = drawer.classList.contains('show'); if(now === was) return; was = now;
+        if(now){
+          drawer.classList.add('is-opening'); setTimeout(()=>drawer.classList.remove('is-opening'), 900);
+          const c = document.getElementById('closeCart'); if(c) c.focus({preventScroll:true});
+        } else if(!document.querySelector('.modal.show')){
+          const b = document.getElementById('cartBtn'); if(b) b.focus({preventScroll:true});
+        }
+      }).observe(drawer, {attributes:true, attributeFilter:['class']});
+    }
+    // Checkout dialog: focus the first field when it opens
+    const modal = document.getElementById('checkoutModal');
+    if(modal){
+      let was = modal.classList.contains('show');
+      new MutationObserver(()=>{
+        const now = modal.classList.contains('show'); if(now === was) return; was = now;
+        if(now){ const f = modal.querySelector('#fname') || modal.querySelector('button'); if(f) f.focus({preventScroll:true}); }
+        else { const b = document.getElementById('cartBtn'); if(b) b.focus({preventScroll:true}); }
+      }).observe(modal, {attributes:true, attributeFilter:['class']});
+    }
+
+    // Menu button announces open/closed; Escape closes the checkout, the bag or the menu
+    const nl = document.getElementById('navLinks'), mt = document.getElementById('menuToggle');
+    if(nl && mt){
+      mt.setAttribute('aria-expanded', 'false');
+      new MutationObserver(()=>mt.setAttribute('aria-expanded', nl.classList.contains('show') ? 'true' : 'false'))
+        .observe(nl, {attributes:true, attributeFilter:['class']});
+    }
+    document.addEventListener('keydown', e=>{
+      if(e.key !== 'Escape') return;
+      if(modal && modal.classList.contains('show')) closeCheckout();
+      else if(drawer && drawer.classList.contains('show')) closeCartFn();
+      else if(nl && nl.classList.contains('show')){ nl.classList.remove('show'); if(mt) mt.focus(); }
+    });
+  }catch(err){ /* motion is optional; never let it break the shop */ }
+})();

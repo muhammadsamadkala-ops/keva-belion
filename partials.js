@@ -67,9 +67,9 @@ ${ORDERS_OPEN ? '' : `<div class="preview-bar" role="note">Preview — the produ
       <a href="faq.html">FAQs</a>
     </nav>
     <div class="nav-right">
-      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
-      <button class="icon-btn" id="cartBtn" aria-label="Open cart">
-        🛍
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <button class="icon-btn" id="cartBtn" aria-label="Open bag">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
         <span class="cart-count" id="cartCount" style="display:none">0</span>
       </button>
     </div>

@@ -1,0 +1,24 @@
+KIVA BELION - local preview (cinematic motion version)
+This is a PREVIEW on your own computer. It is NOT live on the internet.
+
+HOW TO OPEN (Windows)
+1. Right-click this ZIP -> "Extract All..." -> Extract. (Do NOT open index.html from inside the ZIP - it will not find its pictures.)
+2. Open the extracted folder "KIVA-BELION-preview".
+3. Double-click "index.html". It opens in your browser (Chrome or Edge works best).
+4. Click around: Collection, a perfume, the bag icon. Everything stays inside this folder.
+
+WHAT YOU NEED
+- Everything the site needs is in this folder: index.html, the other pages, styles.css, app.js,
+  data.js, partials.js, and the assets folder (logo, product photos, hero video and poster).
+- Fonts: the site's two fonts (Fraunces and Manrope) are loaded from Google Fonts, so they appear
+  when you are online. Offline, the browser shows a similar system font instead - the layout still works.
+  I could not bundle the font files in this ZIP because my work environment blocks downloading them.
+- The shopping bag and ordering are switched OFF on purpose (ORDERS_OPEN = false), so buttons say "Coming soon".
+
+TO SEE THE MOTION
+- Reload the home page to watch the hero text reveal and the slow video zoom.
+- Scroll down slowly to see cards and sections appear; hover a product photo on a computer.
+- If your computer is set to "reduce motion" (Windows: Settings > Accessibility > Visual effects >
+  Animation effects = Off), the site shows no animation and a still hero picture. That is intended.
+
+IF A PAGE LOOKS UNSTYLED: you probably opened a file from inside the ZIP. Extract first, then open again.

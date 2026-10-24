@@ -167,7 +167,7 @@ function renderProductCard(p, container){
     </a>
     <div class="card-actions">
       <a href="${productUrl(p)}" class="view-details-btn">View Details</a>
-      ${orderState(p) === 'ok' ? `<button class="add-btn" data-id="${p.id}">Add to Cart</button>` : `<button class="add-btn" disabled>${orderState(p) === 'soon' ? 'Coming soon' : 'Sold out'}</button>`}
+      ${orderState(p) === 'ok' ? `<button class="add-btn" data-id="${p.id}">Add to bag</button>` : `<button class="add-btn" disabled>${orderState(p) === 'soon' ? 'Coming soon' : 'Sold out'}</button>`}
     </div>
   `;
   container.appendChild(card);
