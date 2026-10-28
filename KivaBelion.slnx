@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/KivaBelion.API/KivaBelion.API.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/KivaBelion.API.Tests/KivaBelion.API.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,28 @@
+@baseUrl = http://localhost:5080
+
+### Is the app running?
+GET {{baseUrl}}/health/live
+
+### Can it reach the database?
+GET {{baseUrl}}/health/ready
+
+### System info (should show testMode true, ordersEnabled false)
+GET {{baseUrl}}/api/v1/system/ping
+
+### Unknown route -> JSON 404
+GET {{baseUrl}}/api/v1/nothing-here
+
+### Deliberate error -> safe JSON 500
+GET {{baseUrl}}/api/v1/dev/throw
+
+### Validation error -> JSON 400 (Name too short, Quantity out of range)
+POST {{baseUrl}}/api/v1/dev/validate
+Content-Type: application/json
+
+{ "name": "A", "quantity": 99 }
+
+### Valid -> 200
+POST {{baseUrl}}/api/v1/dev/validate
+Content-Type: application/json
+
+{ "name": "Test", "quantity": 2 }
