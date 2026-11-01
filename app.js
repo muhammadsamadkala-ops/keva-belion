@@ -400,6 +400,15 @@ initScrollReveal();
     }
     window.addEventListener('scroll', onScroll, {passive:true}); onScroll();
 
+    // Fill the first screen: hero height = viewport minus the preview banner + header above it
+    function sizeHero(){
+      if(!hero) return;
+      const top = Math.round(hero.getBoundingClientRect().top + (window.scrollY || 0));
+      if(top > 0 && top < 300) hero.style.setProperty('--chrome', top + 'px');
+    }
+    sizeHero(); window.addEventListener('resize', sizeHero); window.addEventListener('load', sizeHero);
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(sizeHero);
+
     if('IntersectionObserver' in window){
       // pause the hero's CSS animations while the hero is off-screen
       if(hero) new IntersectionObserver(es=>es.forEach(e=>hero.classList.toggle('is-offscreen', !e.isIntersecting))).observe(hero);
