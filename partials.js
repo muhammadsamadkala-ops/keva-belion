@@ -51,6 +51,7 @@ function socialLinksHTML(){
 const MEGA_MENU = {
   shop: {
     label:'Shop', title:'Shop perfumes', width:940, featured:['noir','blanc','ocean'],
+    promo:{eyebrow:'Not sure where to start?', title:'Find your scent', copy:"Three quick questions, and we'll point you to the Kiva Belion fragrance that fits you best.", label:'Take the quiz', href:'quiz.html'},
     links:[
       {label:'All Perfumes',       href:'signature-collection.html'},
       {label:"Men's Collection",   href:'signature-collection.html?for=men'},
@@ -59,10 +60,11 @@ const MEGA_MENU = {
       {label:'Best Sellers',       href:null},
       {label:'New Arrivals',       href:null},
     ],
-    foot:{text:'Not sure where to start?', label:'Find your scent', href:'quiz.html'}
+    foot:{text:'Questions about our perfumes?', label:'Read the FAQs', href:'faq.html'}
   },
   collections: {
-    label:'Collections', title:'Our collections', width:760, featured:['rouge','amber'],
+    label:'Collections', title:'Our collections', width:860, featured:['rouge','amber','vert'],
+    promo:{eyebrow:'The collection', title:'Signature collection', copy:'Mixed and bottled by us, in Karachi.', label:'View full collection', href:'signature-collection.html'},
     links:[
       {label:'Signature Collection', href:'signature-collection.html'},
       ...(SHOW_INSPIRED ? [{label:'Inspired Collection', href:'inspired-collection.html'}] : []),
@@ -87,6 +89,14 @@ function megaInnerHTML(key){
       <ul class="mega-links">${links}</ul>
     </div>
     <div class="mega-cards" data-mega-cards="${key}" data-count="${m.featured.length}"></div>
+    <div class="mega-promo">
+      <div class="mega-promo-text">
+        <p class="mega-promo-eyebrow">${m.promo.eyebrow}</p>
+        <p class="mega-promo-title">${m.promo.title}</p>
+        <p class="mega-promo-copy">${m.promo.copy}</p>
+      </div>
+      <a class="mega-promo-cta" href="${m.promo.href}">${m.promo.label} <span aria-hidden="true">&rarr;</span></a>
+    </div>
     <p class="mega-foot"><span>${m.foot.text}</span> <a href="${m.foot.href}">${m.foot.label} <span aria-hidden="true">&rarr;</span></a></p>
   </div>`;
 }
@@ -112,7 +122,7 @@ ${ORDERS_OPEN ? '' : `<div class="preview-bar" role="note">Preview — the produ
 <header class="site-nav">
   <div class="nav-inner">
     <a href="index.html" class="logo-chip" aria-label="Kiva Belion home">
-      <img src="assets/logo.png" alt="Kiva Belion">
+      <img src="assets/logo.png" alt="Kiva Belion" width="500" height="450" onerror="this.outerHTML='<span class=&quot;logo-text&quot;>KIVA BELION</span>'">
     </a>
     <nav class="nav-links" id="navLinks" aria-label="Main">
       <span class="nav-pill" aria-hidden="true"></span>
@@ -166,7 +176,7 @@ function injectFooterAndModals(){
 <footer id="contact">
   <div class="footer-grid">
     <div class="footer-brand">
-      <span class="logo-chip"><img src="assets/logo.png" alt="Kiva Belion"></span>
+      <span class="logo-chip"><img src="assets/logo.png" alt="Kiva Belion" width="500" height="450" onerror="this.outerHTML='<span class=&quot;logo-text&quot;>KIVA BELION</span>'"></span>
       <p>Eau de parfums made by us in Karachi, Pakistan.</p>
       <div class="socials socials-brand">${socialLinksHTML()}</div>
       <div class="payment-note"><span class="dot"></span> Cash on Delivery &amp; WhatsApp orders</div>
