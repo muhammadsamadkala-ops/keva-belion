@@ -393,8 +393,11 @@ initScrollReveal();
         ticking = false;
         const y = window.scrollY || 0;
         if(header) header.classList.toggle('scrolled', y > 8);
-        if(hero && !RM.matches && fine.matches && y < hero.offsetHeight){
-          hero.style.setProperty('--py', Math.min(24, y * 0.06).toFixed(1) + 'px');
+        if(hero && y < hero.offsetHeight){
+          // gentle parallax for everyone who has not asked for reduced motion (smaller travel on phones)
+          if(!RM.matches) hero.style.setProperty('--py', Math.min(fine.matches ? 40 : 22, y * (fine.matches ? 0.11 : 0.07)).toFixed(1) + 'px');
+          // scroll cue fades away as soon as the visitor scrolls
+          hero.style.setProperty('--cue', Math.max(0, 1 - y / 90).toFixed(2));
         }
       });
     }
