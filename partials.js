@@ -45,6 +45,72 @@ function socialLinksHTML(){
   ).join('');
 }
 
+/* ============ MEGA MENU CONTENT ============ */
+/* href:null = no page/data exists yet, so the item shows as "Coming soon" instead of linking anywhere.
+   Put the real page address in href when that page is ready. Product cards come from data.js (ids below). */
+const MEGA_MENU = {
+  shop: {
+    label:'Shop', title:'Shop perfumes', width:940, featured:['noir','blanc','ocean'],
+    promo:{eyebrow:'Not sure where to start?', title:'Find your scent', copy:"Three quick questions, and we'll point you to the Kiva Belion fragrance that fits you best.", label:'Take the quiz', href:'quiz.html'},
+    links:[
+      {label:'All Perfumes',       href:'signature-collection.html'},
+      {label:"Men's Collection",   href:'signature-collection.html?for=men'},
+      {label:"Women's Collection", href:'signature-collection.html?for=women'},
+      {label:'Unisex Collection',  href:'signature-collection.html?for=unisex'},
+      {label:'Best Sellers',       href:null},
+      {label:'New Arrivals',       href:null},
+    ],
+    foot:{text:'Questions about our perfumes?', label:'Read the FAQs', href:'faq.html'}
+  },
+  collections: {
+    label:'Collections', title:'Our collections', width:860, featured:['rouge','amber','vert'],
+    promo:{eyebrow:'The collection', title:'Signature collection', copy:'Mixed and bottled by us, in Karachi.', label:'View full collection', href:'signature-collection.html'},
+    links:[
+      {label:'Signature Collection', href:'signature-collection.html'},
+      ...(SHOW_INSPIRED ? [{label:'Inspired Collection', href:'inspired-collection.html'}] : []),
+      {label:'Luxury Collection',    href:null},
+      {label:'Oud Collection',       href:null},
+      {label:'Gift Sets',            href:null},
+    ],
+    foot:{text:'Questions about our perfumes?', label:'Read the FAQs', href:'faq.html'}
+  }
+};
+const MEGA_CHEVRON = '<svg class="chev" viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>';
+
+function megaInnerHTML(key){
+  const m = MEGA_MENU[key];
+  const links = m.links.map((l,i) => l.href
+    ? `<li style="--i:${i}"><a class="mega-link" href="${l.href}"><span>${l.label}</span></a></li>`
+    : `<li style="--i:${i}"><span class="mega-link is-soon" aria-disabled="true"><span>${l.label}</span><small>Coming soon</small></span></li>`
+  ).join('');
+  return `<div class="mega-grid mega-${key}">
+    <div class="mega-side">
+      <p class="mega-eyebrow">${m.title}</p>
+      <ul class="mega-links">${links}</ul>
+    </div>
+    <div class="mega-cards" data-mega-cards="${key}" data-count="${m.featured.length}"></div>
+    <div class="mega-promo">
+      <div class="mega-promo-text">
+        <p class="mega-promo-eyebrow">${m.promo.eyebrow}</p>
+        <p class="mega-promo-title">${m.promo.title}</p>
+        <p class="mega-promo-copy">${m.promo.copy}</p>
+      </div>
+      <a class="mega-promo-cta" href="${m.promo.href}">${m.promo.label} <span aria-hidden="true">&rarr;</span></a>
+    </div>
+    <p class="mega-foot"><span>${m.foot.text}</span> <a href="${m.foot.href}">${m.foot.label} <span aria-hidden="true">&rarr;</span></a></p>
+  </div>`;
+}
+function megaTriggerHTML(key){
+  const m = MEGA_MENU[key];
+  return `<div class="nav-item has-menu" data-key="${key}">
+        <button type="button" class="nav-link nav-trigger" data-menu="${key}" aria-expanded="false" aria-haspopup="true">${m.label}${MEGA_CHEVRON}</button>
+        <div class="nav-acc"><div class="nav-acc-inner">${megaInnerHTML(key)}</div></div>
+      </div>`;
+}
+function megaPanelHTML(key){
+  return `<section class="mega-panel" data-panel="${key}" data-w="${MEGA_MENU[key].width}" aria-label="${MEGA_MENU[key].label}"><div class="mega-inner">${megaInnerHTML(key)}</div></section>`;
+}
+
 /* ============ SHARED HEADER / FOOTER / CART MARKUP ============ */
 /* Injected at load time so every page stays in sync from one place. */
 
@@ -56,16 +122,23 @@ ${ORDERS_OPEN ? '' : `<div class="preview-bar" role="note">Preview — the produ
 <header class="site-nav">
   <div class="nav-inner">
     <a href="index.html" class="logo-chip" aria-label="Kiva Belion home">
-      <img src="assets/logo.png" alt="Kiva Belion">
+      <img src="assets/logo.png" alt="Kiva Belion" width="500" height="450" onerror="this.outerHTML='<span class=&quot;logo-text&quot;>KIVA BELION</span>'">
     </a>
-    <nav class="nav-links" id="navLinks">
-      <a href="index.html">Home</a>
-      <a href="signature-collection.html">Collection</a>
-      ${SHOW_INSPIRED ? '<a href="inspired-collection.html">Inspired</a>' : ''}
-      <a href="quiz.html">Find Your Scent</a>
-      <a href="index.html#about">About</a>
-      <a href="faq.html">FAQs</a>
+    <nav class="nav-links" id="navLinks" aria-label="Main">
+      <span class="nav-pill" aria-hidden="true"></span>
+      <span class="nav-indicator" aria-hidden="true"></span>
+      <div class="nav-item"><a class="nav-link" data-nav="home" href="index.html">Home</a></div>
+      ${megaTriggerHTML('shop')}
+      ${megaTriggerHTML('collections')}
+      <div class="nav-item"><a class="nav-link" data-nav="about" href="index.html#about">About Us</a></div>
+      <div class="nav-item"><a class="nav-link" data-nav="contact" href="#contact">Contact</a></div>
     </nav>
+    <div class="mega" id="mega" aria-hidden="true">
+      <div class="mega-surface"><div class="mega-clip">
+        ${megaPanelHTML('shop')}
+        ${megaPanelHTML('collections')}
+      </div></div>
+    </div>
     <div class="nav-right">
       <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
       <button class="icon-btn" id="cartBtn" aria-label="Open bag">
@@ -103,7 +176,7 @@ function injectFooterAndModals(){
 <footer id="contact">
   <div class="footer-grid">
     <div class="footer-brand">
-      <span class="logo-chip"><img src="assets/logo.png" alt="Kiva Belion"></span>
+      <span class="logo-chip"><img src="assets/logo.png" alt="Kiva Belion" width="500" height="450" onerror="this.outerHTML='<span class=&quot;logo-text&quot;>KIVA BELION</span>'"></span>
       <p>Eau de parfums made by us in Karachi, Pakistan.</p>
       <div class="socials socials-brand">${socialLinksHTML()}</div>
       <div class="payment-note"><span class="dot"></span> Cash on Delivery &amp; WhatsApp orders</div>

@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261024d">
+<link rel="stylesheet" href="styles.css?v=20261102a">
 </head>
 <body>
 
@@ -47,12 +47,21 @@
 
 <div id="site-footer-modals"></div>
 
-<script src="partials.js?v=20261024d"></script>
-<script src="data.js?v=20261024d"></script>
+<script src="partials.js?v=20261102a"></script>
+<script src="data.js?v=20261102a"></script>
 <script>
   const grid = document.getElementById('productGrid');
-  PRODUCTS.forEach(p=>renderProductCard(p, grid, true));
+  // Menu links like signature-collection.html?for=men show only that group (uses the existing "gender" field)
+  const FOR_LABEL = {men:"Men's collection", women:"Women's collection", unisex:"Unisex collection"};
+  const forKey = new URLSearchParams(location.search).get('for');
+  const list = FOR_LABEL[forKey] ? PRODUCTS.filter(p=>p.gender===forKey) : PRODUCTS;
+  if(FOR_LABEL[forKey]){
+    const h = document.querySelector('.page-header h1'); if(h) h.textContent = FOR_LABEL[forKey];
+    const c = document.querySelector('.page-header .crumb'); if(c) c.innerHTML = '<a href="index.html">Home</a> / <a href="signature-collection.html">Signature Collection</a> / ' + FOR_LABEL[forKey];
+  }
+  list.forEach(p=>renderProductCard(p, grid, true));
 </script>
-<script src="app.js?v=20261024d"></script>
+<script src="app.js?v=20261102a"></script>
+<script src="mega-menu.js?v=20261102a"></script>
 </body>
 </html>

@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=20261024d">
+<link rel="stylesheet" href="styles.css?v=20261102a">
 </head>
 <body>
 
@@ -41,23 +41,29 @@
 <div id="site-header"></div>
 
 <!-- HERO -->
-<section class="hero hero-video-active" id="top">
-  <div class="hero-video-wrap" aria-hidden="true">
-    <video autoplay muted loop playsinline poster="assets/hero-poster.jpg">
-      <source src="assets/kiva-hero.mp4" type="video/mp4">
-    </video>
-    <div class="hero-video-overlay"></div>
-  </div>
-  <div class="hero-content">
-    <span class="eyebrow-pill"><span class="pulse-dot"></span> Made in Karachi, Pakistan</span>
-    <h1>Fragrance as identity,<br><span class="glow-line">not accessory.</span></h1>
-    <p class="lede">We make every fragrance ourselves, here in Karachi. It's not outsourced, and it's not someone else's formula with our name stuck on the bottle.</p>
-
-    <div class="hero-ctas">
-      <a href="signature-collection.html" class="btn btn-primary">Shop the collection</a>
-      <a href="#about" class="btn btn-ghost">Our story</a>
+<section class="hero" id="top">
+  <div class="hero-bg" aria-hidden="true"><span class="hero-glow"></span></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <p class="eyebrow-pill">KIVA BELION — MADE IN KARACHI, PAKISTAN</p>
+      <h1>
+        <span class="line" style="--l:0"><span>Fragrance is more</span></span>
+        <span class="line" style="--l:1"><span>than a scent.</span></span>
+        <span class="line glow-line" style="--l:2"><span>It's your identity.</span></span>
+      </h1>
+      <p class="lede">Discover fragrances crafted with character, passion and individuality.</p>
+      <div class="hero-ctas">
+        <a href="signature-collection.html" class="btn btn-primary">Explore collection <span class="btn-arrow" aria-hidden="true">&rarr;</span></a>
+        <a href="#about" class="btn btn-ghost">Our story</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <figure class="hero-bottle">
+        <img src="assets/products/noir.jpg" alt="Noir Eau de Parfum, a black glass Kiva Belion bottle with a gold cap" width="384" height="512" fetchpriority="high" decoding="async">
+      </figure>
     </div>
   </div>
+  <a class="scroll-cue" href="#collection" aria-label="Scroll to the collection"><span>Scroll</span><i aria-hidden="true"></i></a>
 </section>
 
 <!-- COLLECTION PREVIEW -->
@@ -196,8 +202,8 @@
 
 <div id="site-footer-modals"></div>
 
-<script src="partials.js?v=20261024d"></script>
-<script src="data.js?v=20261024d"></script>
+<script src="partials.js?v=20261102a"></script>
+<script src="data.js?v=20261102a"></script>
 <script>
   const grid = document.getElementById('productGrid');
   PRODUCTS.forEach(p=>renderProductCard(p, grid, true));
@@ -231,6 +237,7 @@
       </div>`).join('');
   })();
 </script>
-<script src="app.js?v=20261024d"></script>
+<script src="app.js?v=20261102a"></script>
+<script src="mega-menu.js?v=20261102a"></script>
 </body>
 </html>
