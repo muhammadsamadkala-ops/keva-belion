@@ -121,8 +121,8 @@ function injectHeader(){
 ${ORDERS_OPEN ? '' : `<div class="preview-bar" role="note">Preview — the products, photos and prices shown are samples. Orders open soon. <a href="${WA_BASE}?text=${encodeURIComponent('Hi Kiva Belion! Please let me know when you launch.')}" target="_blank" rel="noopener">Get notified on WhatsApp</a></div>`}
 <header class="site-nav">
   <div class="nav-inner">
-    <a href="index.html" class="logo-chip" aria-label="Kiva Belion home">
-      <img src="assets/logo.png" alt="Kiva Belion" width="500" height="450" onerror="this.outerHTML='<span class=&quot;logo-text&quot;>KIVA BELION</span>'">
+    <a href="index.html" class="logo-chip wordmark-link" aria-label="Kiva Belion home">
+      <span class="wordmark"><span class="wm-a">KIVA</span> <span class="wm-b">BELION</span></span>
     </a>
     <nav class="nav-links" id="navLinks" aria-label="Main">
       <span class="nav-pill" aria-hidden="true"></span>
