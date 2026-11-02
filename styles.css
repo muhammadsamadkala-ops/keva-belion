@@ -122,6 +122,7 @@ nav.nav-links{display:flex; gap:6px; justify-content:center; position:relative; 
   background:var(--gold); opacity:0; pointer-events:none; z-index:1;
 }
 .nav-acc{display:none;}
+.nav-back{display:none;}
 
 /* ---------- MEGA MENU (desktop) ---------- */
 .mega{
@@ -864,7 +865,7 @@ footer{border-top:1px solid var(--gold); padding:68px 28px 32px; background:var(
   .nav-right .icon-btn{grid-column:3; grid-row:1; justify-self:end;}
   nav.nav-links{
     position:absolute; top:100%; left:0; right:0; background:var(--bg);
-    flex-direction:column; align-items:stretch; padding:8px 24px 16px; gap:0;
+    flex-direction:column; justify-content:flex-start; align-items:stretch; padding:8px 24px 16px; gap:0;
     border-bottom:1px solid var(--gold);
     box-shadow:0 18px 30px rgba(20,17,15,.12);
     max-height:calc(100vh - 110px); max-height:calc(100dvh - 110px); overflow-y:auto; overscroll-behavior:contain;
@@ -890,6 +891,21 @@ footer{border-top:1px solid var(--gold); padding:68px 28px 32px; background:var(
   .nav-acc .mega-promo-cta:hover{background:var(--brand);}
   .nav-acc .mega-promo-title{font-size:1.15rem;}
   .nav-acc .mega-eyebrow{display:none;}
+  /* drill-down: while a submenu is open only it is shown, headed by the Back button */
+  nav.nav-links.sub-open > .nav-item:not(.is-open){display:none;}
+  nav.nav-links.sub-open > .nav-item.is-open{border-bottom:0;}
+  nav.nav-links.sub-open > .nav-item.is-open > .nav-trigger{display:none;}
+  nav.nav-links.sub-open .nav-acc .mega-eyebrow{display:block; margin:2px 0 6px; padding-bottom:10px;}
+  .nav-back{
+    display:flex; align-items:center; gap:10px; width:100%; min-height:48px; margin:0 0 2px; padding:12px 0;
+    background:none; border:0; border-bottom:1px solid var(--line); cursor:pointer; text-align:left;
+    font:700 12.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; color:var(--ink);
+    transition:color .25s var(--ease);
+  }
+  .nav-back-arrow{font-size:18px; line-height:1; color:var(--gold-bright); transition:transform .35s var(--ease);}
+  .nav-back:hover, .nav-back:focus-visible{color:var(--brand);}
+  .nav-back:hover .nav-back-arrow, .nav-back:focus-visible .nav-back-arrow{transform:translateX(-4px);}
+  .nav-back:focus-visible{outline:2px solid var(--gold-bright); outline-offset:2px;}
   .nav-acc .mega-link{font-size:1.05rem; min-height:44px;}
   .nav-acc a.mega-link::before{display:none;}
   .nav-acc a.mega-link:hover{transform:none;}

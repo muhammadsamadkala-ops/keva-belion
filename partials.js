@@ -104,7 +104,7 @@ function megaTriggerHTML(key){
   const m = MEGA_MENU[key];
   return `<div class="nav-item has-menu" data-key="${key}">
         <button type="button" class="nav-link nav-trigger" data-menu="${key}" aria-expanded="false" aria-haspopup="true">${m.label}${MEGA_CHEVRON}</button>
-        <div class="nav-acc"><div class="nav-acc-inner">${megaInnerHTML(key)}</div></div>
+        <div class="nav-acc"><div class="nav-acc-inner"><button type="button" class="nav-back" aria-label="Back to main menu"><span class="nav-back-arrow" aria-hidden="true">&larr;</span> Back</button>${megaInnerHTML(key)}</div></div>
       </div>`;
 }
 function megaPanelHTML(key){
