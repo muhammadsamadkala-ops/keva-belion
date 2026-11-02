@@ -291,20 +291,77 @@
       if(e.key === 'Escape' && state.key && !mega.contains(document.activeElement)) closeMenu();
     });
 
-    /* ---------- mobile / tablet accordion ---------- */
-    function toggleAccordion(key){
-      var items = nav.querySelectorAll('.nav-item.has-menu');
-      Array.prototype.forEach.call(items, function(it){
-        var on = it.getAttribute('data-key') === key && !it.classList.contains('is-open');
+    /* ---------- mobile / tablet submenu (drill-down with a Back button) ---------- */
+    // Opening Shop or Collections shows only that submenu with a "← Back" button on top. We add ONE browser-history
+    // entry while a submenu is open, so the phone's own Back button / swipe closes the submenu (back to the main menu)
+    // instead of leaving the page. We remove that entry again whenever the submenu closes some other way.
+    var sub = { key: null, pushed: false, selfPop: false };
+    var items = function(){ return nav.querySelectorAll('.nav-item.has-menu'); };
+    function showSubUI(key){
+      Array.prototype.forEach.call(items(), function(it){
+        var on = it.getAttribute('data-key') === key;
         it.classList.toggle('is-open', on);
         it.querySelector('.nav-trigger').setAttribute('aria-expanded', on ? 'true' : 'false');
       });
+      nav.classList.add('sub-open'); sub.key = key; nav.scrollTop = 0;
     }
-    function resetAccordion(){
-      Array.prototype.forEach.call(nav.querySelectorAll('.nav-item.has-menu'), function(it){
+    function hideSubUI(){
+      Array.prototype.forEach.call(items(), function(it){
         it.classList.remove('is-open'); it.querySelector('.nav-trigger').setAttribute('aria-expanded', 'false');
       });
+      nav.classList.remove('sub-open'); sub.key = null;
     }
+    function dropHistoryEntry(){            // remove our entry without triggering a second close
+      if(!sub.pushed) return false;
+      sub.pushed = false; sub.selfPop = true;
+      try{ history.back(); }catch(e){ sub.selfPop = false; }
+      return true;
+    }
+    function openSub(key){
+      showSubUI(key);
+      if(!sub.pushed){ try{ history.pushState({ kivaSub: 1 }, ''); sub.pushed = true; }catch(e){} }
+      var back = nav.querySelector('.nav-item[data-key="' + key + '"] .nav-back');
+      if(back) setTimeout(function(){ try{ back.focus({ preventScroll: true }); }catch(e){} }, 60);
+    }
+    function closeSub(returnFocus){
+      var key = sub.key;
+      hideSubUI(); dropHistoryEntry();
+      if(returnFocus && key){ var t = triggerFor(key); if(t) t.focus({ preventScroll: true }); }
+    }
+    function toggleAccordion(key){ if(sub.key === key) closeSub(true); else openSub(key); }
+    function resetAccordion(){ hideSubUI(); dropHistoryEntry(); }
+
+    Array.prototype.forEach.call(nav.querySelectorAll('.nav-back'), function(btn){
+      btn.addEventListener('click', function(){ closeSub(true); });
+    });
+    // phone Back button / swipe-back: close the submenu only
+    window.addEventListener('popstate', function(){
+      if(sub.selfPop){ sub.selfPop = false; return; }
+      if(sub.pushed){ sub.pushed = false; hideSubUI(); }
+    });
+    // Escape in the submenu goes back one level (the menu itself stays open)
+    nav.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && sub.key && mqMobile.matches){ e.stopPropagation(); closeSub(true); }
+    });
+    // choosing a submenu link: drop our history entry first so the visitor is not left with a duplicate page in history
+    Array.prototype.forEach.call(nav.querySelectorAll('.nav-acc a[href]'), function(a){
+      a.addEventListener('click', function(e){
+        if(!sub.pushed || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        e.preventDefault();
+        var href = a.href, done = false;
+        function go(){ if(done) return; done = true; location.href = href; }
+        window.addEventListener('popstate', go, { once: true });
+        setTimeout(go, 350);
+        dropHistoryEntry();
+      });
+    });
+    // the main menu closing (menu button, link, Escape in app.js) always resets to the main list
+    new MutationObserver(function(){
+      if(!nav.classList.contains('show') && (sub.key || sub.pushed)) resetAccordion();
+    }).observe(nav, { attributes: true, attributeFilter: ['class'] });
+    // page restored from history with our marker: nothing is open any more
+    try{ if(history.state && history.state.kivaSub){ history.replaceState(null, ''); } }catch(e){}
+    window.addEventListener('pageshow', function(ev){ if(ev.persisted) resetAccordion(); });
 
     /* ---------- layout refresh (resize, fonts, breakpoint) ---------- */
     function refresh(){
