@@ -122,7 +122,7 @@ ${ORDERS_OPEN ? '' : `<div class="preview-bar" role="note">Preview — the produ
 <header class="site-nav">
   <div class="nav-inner">
     <a href="index.html" class="logo-chip wordmark-link" aria-label="Kiva Belion home">
-      <span class="wordmark"><span class="wm-a">KIVA</span> <span class="wm-b">BELION</span></span>
+      <span class="wordmark"><span class="wm-a">KIVA</span> <span class="wm-b"><span class="wm-dot">BEL</span>ION</span></span>
     </a>
     <nav class="nav-links" id="navLinks" aria-label="Main">
       <span class="nav-pill" aria-hidden="true"></span>
