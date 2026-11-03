@@ -118,6 +118,7 @@ function injectHeader(){
   const el = document.getElementById('site-header');
   if(!el) return;
   el.outerHTML = `
+<a class="skip-link" href="#main">Skip to main content</a>
 ${ORDERS_OPEN ? '' : `<div class="preview-bar" role="note">Preview — the products, photos and prices shown are samples. Orders open soon. <a href="${WA_BASE}?text=${encodeURIComponent('Hi Kiva Belion! Please let me know when you launch.')}" target="_blank" rel="noopener">Get notified on WhatsApp</a></div>`}
 <header class="site-nav">
   <div class="nav-inner">
@@ -157,7 +158,7 @@ function injectFooterAndModals(){
   el.outerHTML = `
 <!-- EMAIL UPDATES -->
 <section class="newsletter">
-  <h3>Stay in the loop</h3>
+  <h2>Stay in the loop</h2>
   <p>New fragrances and restocks, straight to your inbox.</p>
   <form class="newsletter-form" id="newsletterForm" novalidate>
     <input type="email" required placeholder="Your email address" id="newsletterEmail" autocomplete="email" aria-label="Email address">
@@ -176,13 +177,13 @@ function injectFooterAndModals(){
 <footer id="contact">
   <div class="footer-grid">
     <div class="footer-brand">
-      <span class="logo-chip"><img src="assets/logo.png" alt="Kiva Belion" width="500" height="450" onerror="this.outerHTML='<span class=&quot;logo-text&quot;>KIVA BELION</span>'"></span>
+      <span class="logo-chip"><img src="assets/logo-200.png" alt="Kiva Belion" width="500" height="450" onerror="this.outerHTML='<span class=&quot;logo-text&quot;>KIVA BELION</span>'"></span>
       <p>Eau de parfums made by us in Karachi, Pakistan.</p>
       <div class="socials socials-brand">${socialLinksHTML()}</div>
       <div class="payment-note"><span class="dot"></span> Cash on Delivery &amp; WhatsApp orders</div>
     </div>
     <div>
-      <h4>Shop</h4>
+      <h3>Shop</h3>
       <ul>
         <li><a href="signature-collection.html">Signature Collection</a></li>
         ${SHOW_INSPIRED ? '<li><a href="inspired-collection.html">Inspired by Icons</a></li>' : ''}
@@ -191,7 +192,7 @@ function injectFooterAndModals(){
       </ul>
     </div>
     <div>
-      <h4>Support</h4>
+      <h3>Support</h3>
       <ul>
         <li><a href="returns.html">Shipping &amp; returns</a></li>
         <li><a href="quiz.html">Find your scent</a></li>
@@ -201,7 +202,7 @@ function injectFooterAndModals(){
       </ul>
     </div>
     <div>
-      <h4>Get in touch</h4>
+      <h3>Get in touch</h3>
       <ul>
         <li><a href="tel:+${WHATSAPP_NUMBER}">Call: ${PHONE_DISPLAY}</a></li>
         <li><a href="${WA_BASE}" target="_blank" rel="noopener">WhatsApp: ${PHONE_DISPLAY}</a></li>
@@ -217,9 +218,9 @@ function injectFooterAndModals(){
 
 <!-- CART -->
 <div class="overlay" id="overlay"></div>
-<aside class="cart-drawer" id="cartDrawer" aria-label="Shopping cart">
+<aside class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
   <div class="cart-head">
-    <h3>Your bag</h3>
+    <h2 id="cartTitle">Your bag</h2>
     <button class="close-btn" id="closeCart" aria-label="Close cart">&times;</button>
   </div>
   <div class="cart-items" id="cartItems"></div>
@@ -234,7 +235,7 @@ function injectFooterAndModals(){
 </aside>
 
 <!-- CHECKOUT MODAL -->
-<div class="modal" id="checkoutModal">
+<div class="modal" id="checkoutModal" role="dialog" aria-modal="true" aria-label="Checkout">
   <div class="modal-box" id="modalBox"></div>
 </div>
 `;

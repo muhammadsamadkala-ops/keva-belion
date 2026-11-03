@@ -39,7 +39,7 @@
           var p = getProductById(id);
           if(!p || !p.image) return;
           html += '<a class="mega-card" href="' + productUrl(p) + '" style="--i:' + n + '">' +
-                  '<span class="mega-card-img"><img src="' + p.image + '" alt="" width="400" height="500" loading="lazy" decoding="async"></span>' +
+                  '<span class="mega-card-img"><img data-src="' + p.image + '" alt="" width="400" height="500" loading="lazy" decoding="async"></span>' +
                   '<span class="mega-card-name">' + p.name + '</span>' +
                   '<span class="mega-card-notes">' + (p.notes || '') + '</span></a>';
           n++;
@@ -49,6 +49,14 @@
       });
     }
     fillCards();
+    // card photos are fetched the first time a menu is opened, not on every page load
+    var megaImgsLoaded = false;
+    function loadMegaImages(){
+      if(megaImgsLoaded) return; megaImgsLoaded = true;
+      Array.prototype.forEach.call(document.querySelectorAll('.mega-card-img img[data-src]'), function(img){
+        img.src = img.getAttribute('data-src'); img.removeAttribute('data-src');
+      });
+    }
 
     /* ---------- springs ---------- */
     function Spring(x, k, c, prec){ this.x = x; this.t = x; this.v = 0; this.k = k; this.c = c; this.p = prec; }
@@ -150,6 +158,7 @@
     function scheduleClose(ms){ cancelClose(); state.closeTimer = setTimeout(closeMenu, ms); }
 
     function openMenu(key){
+      loadMegaImages();
       if(mqMobile.matches || !panels[key]) return;
       cancelClose(); clearTimeout(state.intentTimer);
       if(state.key === key) return;
@@ -318,6 +327,7 @@
       return true;
     }
     function openSub(key){
+      loadMegaImages();
       showSubUI(key);
       if(!sub.pushed){ try{ history.pushState({ kivaSub: 1 }, ''); sub.pushed = true; }catch(e){} }
       var back = nav.querySelector('.nav-item[data-key="' + key + '"] .nav-back');

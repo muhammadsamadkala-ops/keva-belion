@@ -127,6 +127,13 @@ function renderCart(){
   }
   const subtotalEl = document.getElementById('cartSubtotal');
   if(subtotalEl) subtotalEl.textContent = 'PKR ' + cartTotal().toLocaleString();
+  // Checkout and WhatsApp only work when the bag holds at least one valid item
+  const hasItems = cart.some(i => i && i.qty > 0 && i.price > 0);
+  ['checkoutBtn','waOrderBtn'].forEach(id=>{
+    const b = document.getElementById(id); if(!b) return;
+    b.disabled = !hasItems;
+    b.setAttribute('aria-disabled', hasItems ? 'false' : 'true');
+  });
 }
 
 function handleAddClick(e){
@@ -167,7 +174,7 @@ const modalBox = document.getElementById('modalBox');
 function checkoutFormHTML(){
   return `
     <button type="button" class="modal-close-btn" id="checkoutCloseBtn" aria-label="Close checkout">&times;</button>
-    <h3>Checkout</h3>
+    <h2 id="checkoutTitle">Checkout</h2>
     <div class="sub">${cart.length} item${cart.length!==1?'s':''} · PKR ${cartTotal().toLocaleString()}</div>
     <form id="checkoutForm">
       <div class="field">
@@ -243,7 +250,7 @@ function openCheckout(){
       <button type="button" class="modal-close-btn" id="checkoutCloseBtn2" aria-label="Close">&times;</button>
       <div class="order-confirm">
         <div class="check-circle">→</div>
-        <h3>One last step</h3>
+        <h2>One last step</h2>
         <p>Your order is ready — <strong>it is only confirmed once you send the message in WhatsApp.</strong></p>
         <p>Total: <strong style="color:var(--gold-bright)">PKR ${total.toLocaleString()}</strong> · Cash on Delivery</p>
         <p style="margin-top:14px;">WhatsApp didn't open? Tap the button below.</p>
@@ -470,6 +477,30 @@ initScrollReveal();
       new MutationObserver(()=>mt.setAttribute('aria-expanded', nl.classList.contains('show') ? 'true' : 'false'))
         .observe(nl, {attributes:true, attributeFilter:['class']});
     }
+    // Keep Tab inside the bag / checkout dialog while it is open
+    document.addEventListener('keydown', e=>{
+      if(e.key !== 'Tab') return;
+      const box = (modal && modal.classList.contains('show')) ? modal : (drawer && drawer.classList.contains('show') ? drawer : null);
+      if(!box) return;
+      const f = Array.prototype.filter.call(box.querySelectorAll('a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])'),
+        el => !el.disabled && !el.hidden && el.offsetParent !== null && el.getAttribute('aria-disabled') !== 'true');
+      if(!f.length) return;
+      const first = f[0], last = f[f.length-1];
+      if(!box.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+      else if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    });
+    // Tap or click outside the open mobile menu closes it
+    document.addEventListener('click', e=>{
+      if(!nl || !nl.classList.contains('show')) return;
+      if(nl.contains(e.target) || (mt && mt.contains(e.target))) return;
+      nl.classList.remove('show');
+    });
+    // Skip link: move focus to the main content
+    document.addEventListener('click', e=>{
+      const s = e.target.closest && e.target.closest('.skip-link'); if(!s) return;
+      const m = document.getElementById('main'); if(m){ e.preventDefault(); m.focus({preventScroll:false}); m.scrollIntoView(); }
+    });
     document.addEventListener('keydown', e=>{
       if(e.key !== 'Escape') return;
       if(modal && modal.classList.contains('show')) closeCheckout();
