@@ -91,13 +91,13 @@ header.site-nav{
   padding-left:var(--ls);                 /* balances the trailing letter-space so the word is truly centred */
   color:var(--ink);
 }
-.wordmark .wm-a{font-weight:600; color:#064E3B;}
+.wordmark .wm-a{font-weight:600; color:#064E3B; position:relative; z-index:1; text-shadow:0 0 1px #faf6ee, 0 0 2px #faf6ee, 0 0 3px rgba(250,246,238,.9);}
 .wordmark .wm-b{font-weight:500; color:#064E3B;}
 /* red dot (brand red from the original logo) sits behind the "BEL" letters */
 .wordmark .wm-dot{position:relative; display:inline-block; z-index:0; font-weight:700;
   text-shadow:0 0 1px #faf6ee, 0 0 2px #faf6ee, 0 0 3px rgba(250,246,238,.9);}
 .wordmark .wm-dot::before{content:''; position:absolute; z-index:-1; left:0; top:50%;
-  width:1.8em; height:1.8em; margin:-.9em 0 0 -.42em; border-radius:50%; background:#E8382F;}
+  width:1.8em; height:1.8em; margin:-.9em 0 0 calc(-.9em - var(--ls) - .125em); border-radius:50%; background:#E8382F;}
 .wordmark::after{                         /* fine gold rule under the name */
   content:''; position:absolute; left:calc(var(--ls) * 1.2); right:calc(var(--ls) * .2); bottom:-9px; height:1px;
   background:linear-gradient(90deg, transparent, #b08d57 18%, #b08d57 82%, transparent);
