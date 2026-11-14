@@ -105,6 +105,8 @@ function renderCart(){
   const totalQty = cart.reduce((s,i)=>s+i.qty,0);
   if(totalQty>0){ countEl.style.display='flex'; countEl.textContent = totalQty; }
   else { countEl.style.display='none'; }
+  const bagBtn = document.getElementById('cartBtn');
+  if(bagBtn) bagBtn.setAttribute('aria-label', totalQty>0 ? 'Open bag, ' + totalQty + (totalQty===1 ? ' item' : ' items') : 'Open bag');
 
   if(cart.length===0){
     wrap.innerHTML = `<div class="cart-empty">Your bag is empty.<br>Add a fragrance to get started.</div>`;
@@ -129,7 +131,7 @@ function renderCart(){
   if(subtotalEl) subtotalEl.textContent = 'PKR ' + cartTotal().toLocaleString();
   // Checkout and WhatsApp only work when the bag holds at least one valid item
   const hasItems = cart.some(i => i && i.qty > 0 && i.price > 0);
-  ['checkoutBtn','waOrderBtn'].forEach(id=>{
+  ['checkoutBtn'].forEach(id=>{
     const b = document.getElementById(id); if(!b) return;
     b.disabled = !hasItems;
     b.setAttribute('aria-disabled', hasItems ? 'false' : 'true');
@@ -167,125 +169,250 @@ if(menuToggleEl && navLinks){
   navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>navLinks.classList.remove('show')));
 }
 
-// ---------- CHECKOUT ----------
+// ---------- CHECKOUT (Cash on Delivery) ----------
+// The order is sent to the Kiva Belion API, which checks every price and total again on the server and
+// saves the order. The bag is only cleared, and a confirmation only shown, after the server answers that the
+// order was really created. No card or bank details are ever asked for. Nothing personal is stored in the browser.
 const checkoutModal = document.getElementById('checkoutModal');
 const modalBox = document.getElementById('modalBox');
 
+const CHECKOUT_PHONE_ALLOWED = /^\+?[0-9 ()\-]{7,30}$/;
+const CHECKOUT_PHONE_COMPACT = /^(?:\+?92|0)?[0-9]{9,10}$/;
+const CHECKOUT_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const CHECKOUT_TIMEOUT_MS = 20000;
+let checkoutBusy = false;          // true while an order is being sent: blocks double submits
+let checkoutAttempt = null;        // {sig, key}: the same key is reused when the SAME order is retried
+
+function escHTML(v){
+  return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function compactPhone(v){
+  return String(v).trim().split('').filter((c,i)=> /\d/.test(c) || (c==='+' && i===0)).join('');
+}
+function newIdempotencyKey(){
+  try{ if(window.crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+  const a = new Uint8Array(16);
+  try{ crypto.getRandomValues(a); }catch(e){ for(let i=0;i<16;i++) a[i] = Math.floor(Math.random()*256); }
+  return Array.prototype.map.call(a, b => ('0'+b.toString(16)).slice(-2)).join('');
+}
+function attemptKeyFor(signature){
+  if(!checkoutAttempt || checkoutAttempt.sig !== signature) checkoutAttempt = {sig: signature, key: newIdempotencyKey()};
+  return checkoutAttempt.key;
+}
+
+function validateCheckout(v){
+  const e = {};
+  if(v.name.length < 2 || v.name.length > 150 || !/[A-Za-zÀ-ɏ؀-ۿ]/.test(v.name)) e.fname = 'Please enter your full name.';
+  if(!CHECKOUT_PHONE_ALLOWED.test(v.phone) || !CHECKOUT_PHONE_COMPACT.test(compactPhone(v.phone))) e.fphone = 'Please enter a valid phone number, for example 0300 1234567.';
+  if(!v.email || v.email.length > 254 || !CHECKOUT_EMAIL.test(v.email)) e.femail = 'Please enter a valid email address.';
+  if(v.address.length < 10 || v.address.length > 200) e.faddress = 'Please enter your complete delivery address (house, street, area).';
+  if(v.city.length < 2 || v.city.length > 100) e.fcity = 'Please enter your city.';
+  if(v.giftMessage.length > 200) e.fgiftmsg = 'The gift message can be at most 200 characters.';
+  return e;
+}
+// Server error keys -> form field ids
+const CHECKOUT_FIELD_MAP = {
+  'customer.fullName':'fname', 'customer.phone':'fphone', 'customer.email':'femail',
+  'shipping.line1':'faddress', 'shipping.city':'fcity', 'note':'fgiftmsg'
+};
+
 function checkoutFormHTML(){
+  const rows = cart.map(i => `
+      <li><span class="cs-name">${escHTML(i.name)} <span class="cs-qty">× ${i.qty}</span></span><span class="cs-amt">PKR ${(i.price*i.qty).toLocaleString()}</span></li>`).join('');
+  const field = (id, label, input, extra) => `
+      <div class="field">
+        <label for="${id}">${label}</label>
+        ${input}
+        <div class="field-error" id="${id}Err" role="alert"></div>
+        ${extra || ''}
+      </div>`;
   return `
     <button type="button" class="modal-close-btn" id="checkoutCloseBtn" aria-label="Close checkout">&times;</button>
     <h2 id="checkoutTitle">Checkout</h2>
-    <div class="sub">${cart.length} item${cart.length!==1?'s':''} · PKR ${cartTotal().toLocaleString()}</div>
-    <form id="checkoutForm">
-      <div class="field">
-        <label for="fname">Full name</label>
-        <input type="text" id="fname" required>
+    <div class="sub">Cash on Delivery · pay when your order arrives</div>
+    <form id="checkoutForm" novalidate>
+      <div class="order-summary" aria-label="Order summary">
+        <ul class="cs-list">${rows}</ul>
+        <div class="cs-total"><span>Total</span><strong>PKR ${cartTotal().toLocaleString()}</strong></div>
       </div>
-      <div class="field">
-        <label for="fphone">Phone number</label>
-        <input type="tel" id="fphone" required placeholder="03XX XXXXXXX">
-      </div>
-      <div class="field">
-        <label for="faddress">Delivery address</label>
-        <input type="text" id="faddress" required>
-      </div>
-      <div class="field">
-        <label for="fcity">City</label>
-        <input type="text" id="fcity" required placeholder="Karachi">
-      </div>
+      ${field('fname','Full name','<input type="text" id="fname" autocomplete="name" maxlength="150" required>')}
+      ${field('fphone','Phone number','<input type="tel" id="fphone" autocomplete="tel" inputmode="tel" maxlength="30" required placeholder="03XX XXXXXXX">')}
+      ${field('femail','Email address','<input type="email" id="femail" autocomplete="email" maxlength="254" required placeholder="you@example.com">')}
+      ${field('faddress','Complete delivery address','<input type="text" id="faddress" autocomplete="street-address" maxlength="200" required placeholder="House / flat, street, area">')}
+      ${field('fcity','City','<input type="text" id="fcity" autocomplete="address-level2" maxlength="100" required placeholder="Karachi">')}
       <div class="field gift-field">
         <label class="gift-check"><input type="checkbox" id="fgift"> This order is a gift</label>
         <textarea id="fgiftmsg" rows="2" maxlength="200" placeholder="Message for the recipient (optional)" hidden></textarea>
+        <div class="field-error" id="fgiftmsgErr" role="alert"></div>
       </div>
       <div class="field">
         <label>Payment method</label>
         <div class="pay-options">
           <div class="pay-option active" data-method="cod">Cash on Delivery</div>
-          <div class="pay-option disabled" aria-disabled="true" title="Card payments are not available yet">
-            <span class="pay-option-icons">
-              <svg viewBox="0 0 24 16" width="26" height="17"><rect x="0.5" y="0.5" width="23" height="15" rx="2.5" fill="#fff" stroke="var(--line)"/><rect x="0.5" y="4" width="23" height="3" fill="var(--gold)"/><rect x="2.5" y="10.5" width="6" height="2" rx="1" fill="var(--text-muted)"/></svg>
-            </span>
-            Card · coming soon
-          </div>
         </div>
-        <p class="pay-note">Want to pay by bank transfer instead? Order on WhatsApp and we'll share the account details.</p>
+        <p class="pay-note">Your order is <strong>unpaid until it is delivered</strong>. Please keep the exact amount in cash ready.</p>
       </div>
-      <button type="submit" class="btn btn-primary modal-submit">Send order on WhatsApp</button>
+      <div class="checkout-status" id="checkoutStatus" role="alert" aria-live="assertive"></div>
+      <button type="submit" class="btn btn-primary modal-submit" id="placeOrderBtn">Place order · Cash on Delivery</button>
     </form>
   `;
+}
+
+function setCheckoutStatus(text, kind){
+  const el = modalBox.querySelector('#checkoutStatus'); if(!el) return;
+  el.textContent = text || '';
+  el.className = 'checkout-status' + (text ? ' show ' + (kind || 'error') : '');
+}
+function showFieldErrors(errors){
+  ['fname','fphone','femail','faddress','fcity','fgiftmsg'].forEach(id=>{
+    const input = modalBox.querySelector('#'+id), err = modalBox.querySelector('#'+id+'Err');
+    if(!input || !err) return;
+    const msg = errors[id] || '';
+    err.textContent = msg;
+    if(msg){ input.setAttribute('aria-invalid','true'); input.setAttribute('aria-describedby', id+'Err'); }
+    else { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-describedby'); }
+  });
+  const first = ['fname','fphone','femail','faddress','fcity','fgiftmsg'].find(id => errors[id]);
+  if(first){ const el = modalBox.querySelector('#'+first); if(el) el.focus(); }
+}
+function setCheckoutBusy(busy){
+  checkoutBusy = busy;
+  const btn = modalBox.querySelector('#placeOrderBtn');
+  if(btn){ btn.disabled = busy; btn.textContent = busy ? 'Placing your order…' : 'Place order · Cash on Delivery'; }
+  const form = modalBox.querySelector('#checkoutForm'); if(form) form.setAttribute('aria-busy', busy ? 'true' : 'false');
+}
+// A response only counts as "order saved" when it has the shape of a real order from the server.
+function isSavedOrder(d){
+  return !!d && typeof d === 'object' && typeof d.orderNumber === 'string' && /^[A-Z0-9-]{6,30}$/.test(d.orderNumber)
+    && typeof d.total === 'number' && Array.isArray(d.items) && d.items.length > 0;
+}
+
+function showOrderConfirmation(order, city){
+  const rows = order.items.map(i => `<li><span class="cs-name">${escHTML(i.name)} <span class="cs-qty">× ${Number(i.quantity)}</span></span><span class="cs-amt">PKR ${Number(i.lineTotal).toLocaleString()}</span></li>`).join('');
+  const fee = Number(order.shippingFee) > 0 ? `<div class="cs-row"><span>Delivery</span><span>PKR ${Number(order.shippingFee).toLocaleString()}</span></div>` : '';
+  modalBox.innerHTML = `
+    <button type="button" class="modal-close-btn" id="checkoutCloseBtn2" aria-label="Close">&times;</button>
+    <div class="order-confirm">
+      <div class="check-circle" aria-hidden="true">✓</div>
+      <h2 id="checkoutTitle">Order received</h2>
+      <p>Thank you${city ? '' : ''}! Your order has been placed.</p>
+      <p class="order-ref-label">Your order reference</p>
+      <p class="order-ref" id="orderRef">${escHTML(order.orderNumber)}</p>
+      <div class="order-summary">
+        <ul class="cs-list">${rows}</ul>
+        ${fee}
+        <div class="cs-total"><span>Total</span><strong>PKR ${Number(order.total).toLocaleString()}</strong></div>
+      </div>
+      <p><strong>Cash on Delivery</strong> — unpaid until delivery. Please keep <strong>PKR ${Number(order.total).toLocaleString()}</strong> in cash ready.</p>
+      <p style="margin-top:8px;">Please save your order reference in case you need to contact us.</p>
+      <div><button class="btn btn-primary" style="margin-top:16px;" id="closeConfirm">Continue shopping</button></div>
+    </div>
+  `;
+  modalBox.querySelector('#closeConfirm').addEventListener('click', closeCheckout);
+  modalBox.querySelector('#checkoutCloseBtn2').addEventListener('click', closeCheckout);
+  const ref = modalBox.querySelector('#orderRef'); if(ref){ ref.setAttribute('tabindex','-1'); ref.focus(); }
+}
+
+async function submitOrder(){
+  if(checkoutBusy) return;                                   // duplicate submission guard
+  syncCartFromStorage();
+  if(cart.length === 0){ closeCheckout(); renderCart(); return; }
+
+  const v = {
+    name: modalBox.querySelector('#fname').value.trim(),
+    phone: modalBox.querySelector('#fphone').value.trim(),
+    email: modalBox.querySelector('#femail').value.trim(),
+    address: modalBox.querySelector('#faddress').value.trim(),
+    city: modalBox.querySelector('#fcity').value.trim(),
+    gift: modalBox.querySelector('#fgift').checked,
+    giftMessage: modalBox.querySelector('#fgiftmsg').value.trim(),
+  };
+  const errors = validateCheckout(v);
+  showFieldErrors(errors);
+  if(Object.keys(errors).length){ setCheckoutStatus('Please check the highlighted fields.', 'error'); return; }
+  setCheckoutStatus('');
+
+  if(!ORDERS_API_BASE){
+    setCheckoutStatus('Online ordering is not available right now, so your order has NOT been placed. Please try again later.', 'error');
+    return;
+  }
+
+  const body = {
+    customer: {fullName: v.name, phone: v.phone, email: v.email},
+    shipping: {line1: v.address, city: v.city},
+    note: v.gift ? ('Gift order' + (v.giftMessage ? ' — message: ' + v.giftMessage : '')) : null,
+    paymentMethod: 'CashOnDelivery',
+    expectedTotal: cartTotal(),
+    items: cart.map(i => ({productSlug: i.id, quantity: i.qty})),
+  };
+  const key = attemptKeyFor(JSON.stringify([body.items, v.phone, v.email, v.address, v.city]));
+
+  setCheckoutBusy(true);
+  const ctrl = new AbortController();
+  const timer = setTimeout(()=>ctrl.abort(), CHECKOUT_TIMEOUT_MS);
+  try{
+    const res = await fetch(ORDERS_API_BASE.replace(/\/+$/,'') + '/api/v1/orders', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'Idempotency-Key': key},
+      body: JSON.stringify(body),
+      signal: ctrl.signal,
+      credentials: 'omit',
+    });
+    let data = null;
+    try{ data = await res.json(); }catch(e){ data = null; }
+
+    if((res.status === 201 || res.status === 200) && isSavedOrder(data)){
+      // Only now is the order real: clear the bag and show the server's own numbers.
+      cart = []; saveCart(); renderCart();
+      checkoutAttempt = null;
+      setCheckoutBusy(false);
+      showOrderConfirmation(data, v.city);
+      return;
+    }
+    if(res.status === 400 && data && data.errors){
+      const fe = {};
+      Object.keys(data.errors).forEach(k=>{ const id = CHECKOUT_FIELD_MAP[k]; if(id) fe[id] = [].concat(data.errors[k])[0]; });
+      showFieldErrors(fe);
+      setCheckoutStatus('Please check the highlighted fields. Your order has not been placed.', 'error');
+    } else if(res.status === 409){
+      setCheckoutStatus((data && data.code === 'price_changed')
+        ? 'Some prices have changed. Please refresh the page and review your bag. Your order has not been placed.'
+        : ((data && data.title) || 'Some items are no longer available.') + ' Your order has not been placed.', 'error');
+    } else if(res.status === 429){
+      setCheckoutStatus('Too many attempts. Please wait a minute and try again. Your order has not been placed.', 'error');
+    } else if(res.status === 503){
+      setCheckoutStatus('Our order system is not accepting orders right now. Your order has not been placed. Please try again later.', 'error');
+    } else {
+      setCheckoutStatus('Something went wrong on our side, so your order has not been confirmed. Please try again.', 'error');
+    }
+  } catch(err){
+    setCheckoutStatus(err && err.name === 'AbortError'
+      ? 'We could not confirm your order in time. It may not have been placed. Press "Place order" again: it is safe, and you will not get a duplicate order.'
+      : 'We could not reach our order system. Your order has NOT been placed. Please check your connection and try again.', 'error');
+  } finally {
+    clearTimeout(timer);
+    if(checkoutBusy) setCheckoutBusy(false);
+  }
 }
 
 function openCheckout(){
   syncCartFromStorage();
   if(!checkoutModal || cart.length===0){ return; }
+  checkoutBusy = false;
   modalBox.innerHTML = checkoutFormHTML();
   checkoutModal.classList.add('show');
   overlay.classList.add('show');
 
   modalBox.querySelector('#checkoutCloseBtn').addEventListener('click', closeCheckout);
-
   const giftBox = modalBox.querySelector('#fgift');
   const giftMsg = modalBox.querySelector('#fgiftmsg');
   giftBox.addEventListener('change', ()=>{ giftMsg.hidden = !giftBox.checked; });
-
-  modalBox.querySelector('#checkoutForm').addEventListener('submit', e=>{
-    e.preventDefault();
-    // Use the latest saved bag (it may have changed in another tab). If it is now empty there is nothing to send.
-    syncCartFromStorage();
-    if(cart.length === 0){ closeCheckout(); renderCart(); return; }
-    const customer = {
-      name: modalBox.querySelector('#fname').value.trim(),
-      phone: modalBox.querySelector('#fphone').value.trim(),
-      address: modalBox.querySelector('#faddress').value.trim(),
-      city: modalBox.querySelector('#fcity').value.trim(),
-      gift: modalBox.querySelector('#fgift').checked,
-      giftMessage: modalBox.querySelector('#fgiftmsg').value.trim(),
-    };
-    const items = cart.map(i => ({name:i.name, price:i.price, qty:i.qty}));
-    const total = cartTotal();
-    const waUrl = buildWhatsAppOrderUrl(items, customer);
-    // Open WhatsApp straight away (this runs inside the user's click, so it is not blocked)
-    window.open(waUrl, '_blank', 'noopener');
-    modalBox.innerHTML = `
-      <button type="button" class="modal-close-btn" id="checkoutCloseBtn2" aria-label="Close">&times;</button>
-      <div class="order-confirm">
-        <div class="check-circle">→</div>
-        <h2>One last step</h2>
-        <p>Your order is ready — <strong>it is only confirmed once you send the message in WhatsApp.</strong></p>
-        <p>Total: <strong style="color:var(--gold-bright)">PKR ${total.toLocaleString()}</strong> · Cash on Delivery</p>
-        <p style="margin-top:14px;">WhatsApp didn't open? Tap the button below.</p>
-        <a class="btn btn-whatsapp" style="margin-top:14px;" href="${waUrl}" target="_blank" rel="noopener">Open WhatsApp</a>
-        <p class="confirm-warning" role="note" style="margin-top:16px; padding:10px 12px; border-left:3px solid var(--coral); background:rgba(217,68,48,.07); color:var(--text); text-align:left; font-size:13.5px;"><strong>Before you tap a button:</strong> tap "I've sent my order" only after you have sent the message in WhatsApp. If you leave without sending it, or without tapping the button, your bag stays saved on this device. Check your bag next time so the same order is not sent twice.</p>
-        <div><button class="btn btn-primary" style="margin-top:12px;" id="sentConfirm">I've sent my order</button></div>
-        <div><button class="btn btn-ghost" style="margin-top:12px;" id="closeConfirm">Continue shopping</button></div>
-      </div>
-    `;
-    // The bag is kept until the customer says the order was sent. Closing this screen does not clear it.
-    modalBox.querySelector('#sentConfirm').addEventListener('click', ()=>{
-      cart = [];
-      saveCart();
-      renderCart();
-      closeCheckout();
-    });
-    modalBox.querySelector('#closeConfirm').addEventListener('click', closeCheckout);
-    modalBox.querySelector('#checkoutCloseBtn2').addEventListener('click', closeCheckout);
-  });
+  modalBox.querySelector('#checkoutForm').addEventListener('submit', e=>{ e.preventDefault(); submitOrder(); });
 }
 function closeCheckout(){
-  if(!checkoutModal) return;
+  if(!checkoutModal || checkoutBusy) return;                // not while an order is being sent
   checkoutModal.classList.remove('show');
   overlay.classList.remove('show');
-}
-const waOrderBtnEl = document.getElementById('waOrderBtn');
-if(waOrderBtnEl){
-  waOrderBtnEl.addEventListener('click', ()=>{
-    if(cart.length === 0){
-      const empty = document.querySelector('.cart-empty');
-      if(empty) empty.style.color = 'var(--coral)';
-      return;
-    }
-    window.open(buildWhatsAppOrderUrl(cart), '_blank', 'noopener');
-  });
 }
 const checkoutBtnEl = document.getElementById('checkoutBtn');
 if(checkoutBtnEl){

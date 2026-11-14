@@ -1111,3 +1111,32 @@ footer{border-top:1px solid var(--gold); padding:68px 28px 32px; background:var(
 .preview-bar{position:relative; z-index:61;}
 .preview-bar a{position:relative;}
 .preview-bar a::after{content:''; position:absolute; left:-8px; right:-8px; top:-15px; bottom:-15px;}
+
+/* ---------- fixes after manual testing ---------- */
+.icon-btn:focus-visible, .menu-toggle:focus-visible{outline:2px solid var(--gold-bright); outline-offset:3px; border-color:var(--gold); background:rgba(176,141,87,.14);}
+.back-row{max-width:1180px; margin:0 auto; padding:14px 28px 0;}
+.back-link{display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 4px; color:var(--brand); font-size:14px; font-weight:600; letter-spacing:.04em; text-decoration:none;}
+.back-link:hover{text-decoration:underline; text-underline-offset:4px;}
+.back-link:focus-visible{outline:2px solid var(--gold-bright); outline-offset:3px; border-radius:4px;}
+.footer-email{overflow-wrap:anywhere;}
+@media (max-width:640px){
+  .footer-brand .logo-chip{display:flex; justify-content:center;}
+}
+
+/* ---------- checkout (Cash on Delivery) ---------- */
+.order-summary{border:1px solid var(--line); border-radius:var(--radius); padding:12px 14px; margin-bottom:18px; background:rgba(0,0,0,.015);}
+.cs-list{list-style:none; margin:0 0 8px; padding:0;}
+.cs-list li{display:flex; justify-content:space-between; gap:12px; font-size:14.5px; padding:4px 0;}
+.cs-qty{color:var(--text-muted);}
+.cs-row, .cs-total{display:flex; justify-content:space-between; gap:12px; font-size:14.5px; padding:4px 0;}
+.cs-total{border-top:1px solid var(--line); margin-top:6px; padding-top:10px; font-size:16px;}
+.cs-total strong{color:var(--gold-bright);}
+.field input[aria-invalid="true"], .field textarea[aria-invalid="true"]{border-color:var(--coral);}
+.field-error{color:var(--coral); font-size:13px; line-height:1.4; margin-top:5px; min-height:0;}
+.field-error:empty{display:none;}
+.checkout-status{display:none; margin:4px 0 12px; padding:10px 12px; border-left:3px solid var(--coral); background:rgba(217,68,48,.07); color:var(--text); font-size:14px; line-height:1.5; text-align:left;}
+.checkout-status.show{display:block;}
+.order-ref-label{margin-top:10px; font-size:13px; text-transform:uppercase; letter-spacing:.12em;}
+.order-ref{font-size:1.6rem; font-weight:700; letter-spacing:.08em; color:var(--gold-bright) !important; margin:2px 0 14px !important; outline:none;}
+.order-confirm .order-summary{text-align:left; margin-top:6px;}
+.modal-submit:disabled{opacity:.65; cursor:wait;}

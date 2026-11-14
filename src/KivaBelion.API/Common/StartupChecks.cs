@@ -62,10 +62,18 @@ public static class StartupChecks
                 "Features:OnlinePaymentsEnabled is true, but online payments are not built yet. Set it to false.");
         }
 
-        if (!env.IsDevelopment() && (!testMode || ordersEnabled))
+        // Cash on Delivery orders may be switched on in any environment, but only when a website address is
+        // allowed to call the API (otherwise no browser could place an order and the mistake would stay hidden).
+        if (ordersEnabled && origins.Length == 0)
         {
             throw new InvalidOperationException(
-                "Outside development, live orders are not allowed yet. Keep Features:TestMode=true and Features:OrdersEnabled=false.");
+                "Features:OrdersEnabled is true but Cors:AllowedOrigins is empty. Add the website address, e.g. Cors__AllowedOrigins__0=https://example.com");
+        }
+
+        var shippingFee = config.GetValue("Orders:ShippingFeePkr", 0m);
+        if (shippingFee < 0)
+        {
+            throw new InvalidOperationException("Orders:ShippingFeePkr cannot be negative.");
         }
 
         logger.LogInformation(

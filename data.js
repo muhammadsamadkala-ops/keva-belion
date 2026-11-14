@@ -94,9 +94,8 @@ function getProductById(id){
   return ALL_PRODUCTS.find(p=>p.id===id);
 }
 
-// 'ok' = can be ordered, 'soon' = site is in preview mode, 'sold' = marked soldOut:true
+// 'ok' = can be ordered, 'sold' = marked soldOut:true
 function orderState(p){
-  if(!ORDERS_OPEN) return 'soon';
   return p.soldOut ? 'sold' : 'ok';
 }
 
@@ -118,8 +117,7 @@ function productUrl(p){
 
 function bottleVisualHTML(p){
   const st = orderState(p);
-  const badge = st === 'soon' ? `<div class="sale-badge sold-badge">Coming soon</div>`
-              : st === 'sold' ? `<div class="sale-badge sold-badge">Sold out</div>`
+  const badge = st === 'sold' ? `<div class="sale-badge sold-badge">Sold out</div>`
               : (p.compareAtPrice ? `<div class="sale-badge">Sale</div>` : '');
   if(p.image){
     return `<div class="bottle-wrap photo-wrap">${badge}<img src="${p.image}" alt="${p.name}" loading="lazy"></div>`;
@@ -167,7 +165,7 @@ function renderProductCard(p, container){
     </a>
     <div class="card-actions">
       <a href="${productUrl(p)}" class="view-details-btn">View Details</a>
-      ${orderState(p) === 'ok' ? `<button class="add-btn" data-id="${p.id}">Add to bag</button>` : `<button class="add-btn" disabled>${orderState(p) === 'soon' ? 'Coming soon' : 'Sold out'}</button>`}
+      ${orderState(p) === 'ok' ? `<button class="add-btn" data-id="${p.id}">Add to bag</button>` : `<button class="add-btn" disabled>Sold out</button>`}
     </div>
   `;
   container.appendChild(card);
@@ -175,28 +173,6 @@ function renderProductCard(p, container){
 
 /* ============ WHATSAPP ORDER MESSAGE ============ */
 // items: array of {name, price, qty}. Uses WA_BASE from partials.js
-function buildWhatsAppOrderUrl(items, customer){
-  const lines = items.map((it, i) =>
-    `${i+1}. ${it.name} (100 ML) x${it.qty} — PKR ${(it.price * it.qty).toLocaleString()}`
-  );
-  const total = items.reduce((s, it) => s + it.price * it.qty, 0);
-  const c = customer || {};
-  const msg =
-`Assalam o Alaikum! I'd like to order from Kiva Belion:
-
-${lines.join('\n')}
-
-Total: PKR ${total.toLocaleString()}
-
-Name: ${c.name || ''}
-Phone: ${c.phone || ''}
-Address: ${c.address || ''}
-City: ${c.city || ''}
-${c.gift ? 'Gift: Yes' + (c.giftMessage ? ' — message: "' + c.giftMessage + '"' : '') + '\n' : ''}Payment: Cash on Delivery`;
-  return `${WA_BASE}?text=${encodeURIComponent(msg)}`;
-}
-
-
 /* ============ CUSTOMER REVIEWS ============
    Add ONLY real reviews from real customers (with their permission).
    Format: {name:'Ali R.', city:'Karachi', product:'Noir', rating:5, text:'Their own words.'}

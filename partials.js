@@ -15,9 +15,10 @@ const SHOW_INSPIRED = false;
 // notes for each scent have been entered in PYRAMIDS (data.js). Set to true only after that.
 const SHOW_FRAGRANCE_PYRAMID = false;
 
-// PREVIEW MODE: while false, the site shows a "samples only" banner and ordering is switched off
-// (buttons say "Coming soon"). Set to true on launch day, once real products, photos and prices are in.
-const ORDERS_OPEN = false;
+// ORDERING: the website sends Cash on Delivery orders to this API, which saves them in the database.
+// Leave empty ('') to switch checkout off: the form then says ordering is unavailable and nothing is sent.
+const ORDERS_API_BASE = 'https://kivabelion-api.runasp.net';
+// Placing an order never needs a payment card or bank details. Cash on Delivery is the only method.
 const SUBSCRIBE_ENDPOINT = 'https://formsubmit.co/ajax/' + SUBSCRIBE_EMAIL;
 
 const SOCIAL = {
@@ -46,8 +47,8 @@ function socialLinksHTML(){
 }
 
 /* ============ MEGA MENU CONTENT ============ */
-/* href:null = no page/data exists yet, so the item shows as "Coming soon" instead of linking anywhere.
-   Put the real page address in href when that page is ready. Product cards come from data.js (ids below). */
+/* Add a menu item only when its page exists. (href:null still renders a non-link item if ever needed.)
+   Product cards come from data.js (ids below). */
 const MEGA_MENU = {
   shop: {
     label:'Shop', title:'Shop perfumes', width:940, featured:['noir','blanc','ocean'],
@@ -57,8 +58,6 @@ const MEGA_MENU = {
       {label:"Men's Collection",   href:'signature-collection.html?for=men'},
       {label:"Women's Collection", href:'signature-collection.html?for=women'},
       {label:'Unisex Collection',  href:'signature-collection.html?for=unisex'},
-      {label:'Best Sellers',       href:null},
-      {label:'New Arrivals',       href:null},
     ],
     foot:{text:'Questions about our perfumes?', label:'Read the FAQs', href:'faq.html'}
   },
@@ -68,9 +67,6 @@ const MEGA_MENU = {
     links:[
       {label:'Signature Collection', href:'signature-collection.html'},
       ...(SHOW_INSPIRED ? [{label:'Inspired Collection', href:'inspired-collection.html'}] : []),
-      {label:'Luxury Collection',    href:null},
-      {label:'Oud Collection',       href:null},
-      {label:'Gift Sets',            href:null},
     ],
     foot:{text:'Questions about our perfumes?', label:'Read the FAQs', href:'faq.html'}
   }
@@ -119,7 +115,6 @@ function injectHeader(){
   if(!el) return;
   el.outerHTML = `
 <a class="skip-link" href="#main">Skip to main content</a>
-${ORDERS_OPEN ? '' : `<div class="preview-bar" role="note">Preview — the products, photos and prices shown are samples. Orders open soon. <a href="${WA_BASE}?text=${encodeURIComponent('Hi Kiva Belion! Please let me know when you launch.')}" target="_blank" rel="noopener">Get notified on WhatsApp</a></div>`}
 <header class="site-nav">
   <div class="nav-inner">
     <a href="index.html" class="logo-chip wordmark-link" aria-label="Kiva Belion home">
@@ -142,7 +137,7 @@ ${ORDERS_OPEN ? '' : `<div class="preview-bar" role="note">Preview — the produ
     </div>
     <div class="nav-right">
       <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-      <button class="icon-btn" id="cartBtn" aria-label="Open bag">
+      <button type="button" class="icon-btn" id="cartBtn" tabindex="0" aria-label="Open bag" aria-haspopup="dialog" aria-controls="cartDrawer">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6L5 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
         <span class="cart-count" id="cartCount" style="display:none">0</span>
       </button>
@@ -206,7 +201,7 @@ function injectFooterAndModals(){
       <ul>
         <li><a href="tel:+${WHATSAPP_NUMBER}">Call: ${PHONE_DISPLAY}</a></li>
         <li><a href="${WA_BASE}" target="_blank" rel="noopener">WhatsApp: ${PHONE_DISPLAY}</a></li>
-        <li><a href="mailto:kevibelion@gmail.com">kevibelion@gmail.com</a></li>
+        <li><a class="footer-email" href="mailto:kivabelion@gmail.com">kivabelion@gmail.com</a></li>
         <li><span style="color:var(--text-muted); font-size:14px;">Karachi, Pakistan</span></li>
       </ul>
     </div>
@@ -227,10 +222,6 @@ function injectFooterAndModals(){
   <div class="cart-foot">
     <div class="subtotal-row"><span>Subtotal</span><strong id="cartSubtotal">PKR 0</strong></div>
     <button class="btn btn-primary" style="width:100%; justify-content:center;" id="checkoutBtn">Checkout</button>
-    <button class="btn btn-whatsapp" style="width:100%; justify-content:center; margin-top:10px;" id="waOrderBtn">
-      <svg viewBox="0 0 32 32" width="18" height="18" fill="#fff" aria-hidden="true"><path d="M16.02 3C9.4 3 4 8.4 4 15.02c0 2.36.66 4.56 1.8 6.44L4 29l7.72-1.75a11.9 11.9 0 0 0 4.3.8h.01c6.62 0 12.02-5.4 12.02-12.02C28.05 8.4 22.65 3 16.02 3zm5.4 18.57c-.25.7-1.45 1.34-2 1.42-.51.08-1.16.11-1.87-.12-.43-.14-.98-.32-1.7-.63-2.98-1.28-4.93-4.28-5.08-4.48-.15-.2-1.21-1.61-1.21-3.07s.77-2.17 1.04-2.47c.27-.3.59-.37.79-.37h.57c.18 0 .43-.07.67.51.25.6.85 2.07.92 2.22.07.15.12.32.02.52-.1.2-.15.32-.3.5-.15.17-.31.39-.45.52-.15.15-.3.31-.13.61.17.3.77 1.27 1.65 2.05 1.13 1.01 2.09 1.32 2.39 1.47.3.15.47.12.65-.07.17-.2.75-.87.95-1.17.2-.3.4-.25.67-.15.27.1 1.73.82 2.03.97.3.15.5.22.57.35.07.12.07.72-.18 1.42z"/></svg>
-      Order via WhatsApp
-    </button>
   </div>
 </aside>
 

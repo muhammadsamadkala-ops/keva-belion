@@ -33,6 +33,7 @@ builder.Services.AddOptions<PasswordHasherOptions>().Configure(o => o.IterationC
 builder.Services.AddSingleton<IPasswordHasher<AdminUser>, PasswordHasher<AdminUser>>();
 builder.Services.AddScoped<IAdminUserStore, EfAdminUserStore>();
 builder.Services.AddScoped<AdminAuthService>();
+builder.Services.AddScoped<KivaBelion.API.Orders.OrderService>();   // Cash on Delivery orders
 builder.Services.AddSingleton<ITokenService, TokenService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
@@ -93,6 +94,14 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy("login", context =>
     {
         var permits = context.RequestServices.GetRequiredService<IConfiguration>().GetValue("RateLimiting:LoginPermitPerMinute", 5);
+        return RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = permits, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 });
+    });
+    // Order placing: a handful of attempts per minute per IP address (setting RateLimiting:CheckoutPermitPerMinute).
+    options.AddPolicy("checkout", context =>
+    {
+        var permits = context.RequestServices.GetRequiredService<IConfiguration>().GetValue("RateLimiting:CheckoutPermitPerMinute", 10);
         return RateLimitPartition.GetFixedWindowLimiter(
             context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             _ => new FixedWindowRateLimiterOptions { PermitLimit = permits, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 });
