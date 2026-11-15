@@ -37,6 +37,34 @@ public class Product : ITimestamped
 
     public bool IsActive { get; set; } = true;
 
+    /// <summary>Short scent summary shown on the product card, e.g. "Oud · Amber · Spice".</summary>
+    [StringLength(300)]
+    public string? Notes { get; set; }
+
+    /// <summary>Photo path (for example "assets/products/noir.jpg") or an https:// address.</summary>
+    [StringLength(300)]
+    public string? ImageUrl { get; set; }
+
+    /// <summary>"men", "women" or "unisex".</summary>
+    [StringLength(30)]
+    public string? Gender { get; set; }
+
+    /// <summary>Scent family, e.g. "woody", "floral", "fresh", "sweet".</summary>
+    [StringLength(60)]
+    public string? Family { get; set; }
+
+    /// <summary>"light" or "bold" (as used by the website filters).</summary>
+    [StringLength(30)]
+    public string? Intensity { get; set; }
+
+    /// <summary>Lower numbers are shown first.</summary>
+    public int SortOrder { get; set; }
+
+    /// <summary>Verified note pyramid. Stay empty (and are never shown publicly) until the owner confirms them.</summary>
+    [StringLength(300)] public string? TopNotes { get; set; }
+    [StringLength(300)] public string? HeartNotes { get; set; }
+    [StringLength(300)] public string? BaseNotes { get; set; }
+
     public DateTimeOffset CreatedAtUtc { get; set; }
     public DateTimeOffset UpdatedAtUtc { get; set; }
 

@@ -180,6 +180,13 @@ const CHECKOUT_PHONE_ALLOWED = /^\+?[0-9 ()\-]{7,30}$/;
 const CHECKOUT_PHONE_COMPACT = /^(?:\+?92|0)?[0-9]{9,10}$/;
 const CHECKOUT_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const CHECKOUT_TIMEOUT_MS = 20000;
+const DELIVERY_FREE_CITY = 'karachi';   // delivery is free here
+const DELIVERY_FEE_OTHER = 500;         // PKR, every other city. The server decides the real fee; this only shows it.
+function deliveryFeeFor(city){
+  let v = String(city||'').trim().toLowerCase().split(/\s+/).filter(Boolean).join(' ');
+  if(v.endsWith(' city')) v = v.slice(0,-5).trim();
+  return v === DELIVERY_FREE_CITY ? 0 : DELIVERY_FEE_OTHER;
+}
 let checkoutBusy = false;          // true while an order is being sent: blocks double submits
 let checkoutAttempt = null;        // {sig, key}: the same key is reused when the SAME order is retried
 
@@ -233,7 +240,8 @@ function checkoutFormHTML(){
     <form id="checkoutForm" novalidate>
       <div class="order-summary" aria-label="Order summary">
         <ul class="cs-list">${rows}</ul>
-        <div class="cs-total"><span>Total</span><strong>PKR ${cartTotal().toLocaleString()}</strong></div>
+        <div class="cs-row"><span>Delivery</span><span id="csDelivery">Free in Karachi · PKR ${DELIVERY_FEE_OTHER.toLocaleString()} for other cities</span></div>
+        <div class="cs-total"><span>Total</span><strong id="csTotal">PKR ${cartTotal().toLocaleString()}</strong></div>
       </div>
       ${field('fname','Full name','<input type="text" id="fname" autocomplete="name" maxlength="150" required>')}
       ${field('fphone','Phone number','<input type="tel" id="fphone" autocomplete="tel" inputmode="tel" maxlength="30" required placeholder="03XX XXXXXXX">')}
@@ -256,6 +264,17 @@ function checkoutFormHTML(){
       <button type="submit" class="btn btn-primary modal-submit" id="placeOrderBtn">Place order · Cash on Delivery</button>
     </form>
   `;
+}
+
+function updateCheckoutTotals(){
+  const cityEl = modalBox.querySelector('#fcity'); if(!cityEl) return;
+  const city = cityEl.value.trim();
+  const d = modalBox.querySelector('#csDelivery'), t = modalBox.querySelector('#csTotal');
+  if(!d || !t) return;
+  if(!city){ d.textContent = 'Free in Karachi · PKR ' + DELIVERY_FEE_OTHER.toLocaleString() + ' for other cities'; t.textContent = 'PKR ' + cartTotal().toLocaleString(); return; }
+  const fee = deliveryFeeFor(city);
+  d.textContent = fee === 0 ? 'Free' : 'PKR ' + fee.toLocaleString();
+  t.textContent = 'PKR ' + (cartTotal() + fee).toLocaleString();
 }
 
 function setCheckoutStatus(text, kind){
@@ -289,7 +308,7 @@ function isSavedOrder(d){
 
 function showOrderConfirmation(order, city){
   const rows = order.items.map(i => `<li><span class="cs-name">${escHTML(i.name)} <span class="cs-qty">× ${Number(i.quantity)}</span></span><span class="cs-amt">PKR ${Number(i.lineTotal).toLocaleString()}</span></li>`).join('');
-  const fee = Number(order.shippingFee) > 0 ? `<div class="cs-row"><span>Delivery</span><span>PKR ${Number(order.shippingFee).toLocaleString()}</span></div>` : '';
+  const fee = `<div class="cs-row"><span>Delivery</span><span>${Number(order.shippingFee) > 0 ? 'PKR ' + Number(order.shippingFee).toLocaleString() : 'Free'}</span></div>`;
   modalBox.innerHTML = `
     <button type="button" class="modal-close-btn" id="checkoutCloseBtn2" aria-label="Close">&times;</button>
     <div class="order-confirm">
@@ -342,7 +361,7 @@ async function submitOrder(){
     shipping: {line1: v.address, city: v.city},
     note: v.gift ? ('Gift order' + (v.giftMessage ? ' — message: ' + v.giftMessage : '')) : null,
     paymentMethod: 'CashOnDelivery',
-    expectedTotal: cartTotal(),
+    expectedTotal: cartTotal() + deliveryFeeFor(v.city),
     items: cart.map(i => ({productSlug: i.id, quantity: i.qty})),
   };
   const key = attemptKeyFor(JSON.stringify([body.items, v.phone, v.email, v.address, v.city]));
@@ -408,6 +427,7 @@ function openCheckout(){
   const giftMsg = modalBox.querySelector('#fgiftmsg');
   giftBox.addEventListener('change', ()=>{ giftMsg.hidden = !giftBox.checked; });
   modalBox.querySelector('#checkoutForm').addEventListener('submit', e=>{ e.preventDefault(); submitOrder(); });
+  modalBox.querySelector('#fcity').addEventListener('input', updateCheckoutTotals);
 }
 function closeCheckout(){
   if(!checkoutModal || checkoutBusy) return;                // not while an order is being sent

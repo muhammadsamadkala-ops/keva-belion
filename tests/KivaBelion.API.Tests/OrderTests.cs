@@ -173,6 +173,26 @@ public class OrderPricingTests
         Assert.Equal(25250m, t.Total);
     }
 
+    [Theory]
+    [InlineData("Karachi", 0)]
+    [InlineData("karachi", 0)]
+    [InlineData("  KARACHI  ", 0)]
+    [InlineData("Karachi City", 0)]
+    [InlineData("Lahore", 500)]
+    [InlineData("Islamabad", 500)]
+    [InlineData("", 500)]
+    [InlineData(null, 500)]
+    public void Delivery_is_free_only_in_karachi(string? city, int expectedFee) =>
+        Assert.Equal((decimal)expectedFee, OrderPricing.ShippingFeeFor(city, "Karachi", 500m));
+
+    [Fact]
+    public void Other_city_total_includes_fee()
+    {
+        var fee = OrderPricing.ShippingFeeFor("Lahore", "Karachi", 500m);
+        var t = OrderPricing.Calculate(new[] { (7500m, 2) }, fee);
+        Assert.Equal(15500m, t.Total);
+    }
+
     [Fact]
     public void Zero_shipping_by_default_policy()
     {

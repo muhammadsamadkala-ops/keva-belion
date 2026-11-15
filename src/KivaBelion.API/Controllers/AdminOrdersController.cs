@@ -61,12 +61,24 @@ public sealed class AdminOrdersController(KivaBelionDbContext db) : ControllerBa
         if (!Enum.TryParse<OrderStatus>(request.Status, ignoreCase: true, out var next) || !Enum.IsDefined(next))
             return BadRequest(new ProblemDetails { Status = 400, Title = "Unknown status." });
 
-        var order = await db.Orders.Include(o => o.Customer).Include(o => o.Items)
+        var order = await db.Orders.Include(o => o.Customer)
+            .Include(o => o.Items).ThenInclude(i => i.Product).ThenInclude(p => p!.Inventory)
             .FirstOrDefaultAsync(o => o.PublicId == publicId, cancellationToken);
         if (order is null) return NotFound();
 
         if (order.Status is OrderStatus.Delivered or OrderStatus.Cancelled)
             return Conflict(new ProblemDetails { Status = 409, Title = $"A {order.Status} order cannot be changed." });
+
+        if (!OrderStatusRules.CanMove(order.Status, next))
+            return Conflict(new ProblemDetails { Status = 409, Title = $"An order that is {order.Status} cannot be moved to {next}." });
+
+        foreach (var item in order.Items)
+        {
+            var inventory = item.Product?.Inventory;
+            if (inventory is null) continue;
+            if (next == OrderStatus.Cancelled) OrderStock.Release(inventory, item.Quantity);
+            else if (next == OrderStatus.Delivered) OrderStock.Deliver(inventory, item.Quantity);
+        }
 
         order.Status = next;
         await db.SaveChangesAsync(cancellationToken);

@@ -101,7 +101,11 @@ public sealed class OrderService(KivaBelionDbContext db, IConfiguration config, 
         }
 
         // ----- money (server side only) -----
-        var shippingFee = config.GetValue("Orders:ShippingFeePkr", 0m);
+        // Free delivery in the free city (Karachi); Orders:ShippingFeePkr is charged for every other city.
+        var shippingFee = OrderPricing.ShippingFeeFor(
+            request.Shipping!.City,
+            config.GetValue("Orders:FreeDeliveryCity", "Karachi") ?? "Karachi",
+            config.GetValue("Orders:ShippingFeePkr", 0m));
         var totals = OrderPricing.Calculate(lines.Select(l => (l.Product.Price, l.Quantity)), shippingFee);
         if (request.ExpectedTotal.HasValue && decimal.Round(request.ExpectedTotal.Value, 2) != totals.Total)
         {
@@ -111,6 +115,12 @@ public sealed class OrderService(KivaBelionDbContext db, IConfiguration config, 
                 Message = "Prices have changed since you added these items. Please review your bag.",
                 ServerTotal = totals.Total,
             };
+        }
+
+        // ----- hold the bottles for this order (released if it is cancelled, taken out of stock when delivered) -----
+        foreach (var (product, quantity) in lines)
+        {
+            if (product.Inventory is not null) OrderStock.Reserve(product.Inventory, quantity);
         }
 
         // ----- customer (one row per email; name and phone follow the latest order) -----
