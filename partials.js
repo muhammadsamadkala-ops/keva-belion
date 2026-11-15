@@ -5,7 +5,7 @@ const WA_BASE = 'https://wa.me/' + WHATSAPP_NUMBER;
 
 // Email updates: each signup is emailed to the address below, and the subscriber gets an automatic welcome email.
 // (Powered by FormSubmit.co — the FIRST signup sends you a one-time activation email; click its link once.)
-const SUBSCRIBE_EMAIL    = 'kevibelion@gmail.com';
+const SUBSCRIBE_EMAIL    = 'kivabelion@gmail.com';
 
 // The "Inspired by" collection is hidden until its real products, prices and photos are confirmed.
 // Set to true only when those are ready (the pages must be restored too — ask for help).

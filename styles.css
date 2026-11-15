@@ -84,20 +84,16 @@ header.site-nav{
 /* ---------- WORDMARK (header brand name) ---------- */
 .wordmark-link{line-height:1; padding:6px 0 10px;}
 .wordmark{
-  --ls:.36em;
+  --ls:.22em;
   position:relative; display:inline-block; white-space:nowrap;
-  font-family:var(--serif); font-optical-sizing:auto; text-transform:uppercase;
-  font-size:clamp(28px, 2.5vw, 36px); line-height:1; letter-spacing:var(--ls);
+  font-family:'Cinzel', var(--serif); font-weight:700; text-transform:uppercase;
+  font-size:clamp(20px, 1.8vw, 26px); line-height:1; letter-spacing:var(--ls);
   padding-left:var(--ls);                 /* balances the trailing letter-space so the word is truly centred */
   color:var(--ink);
 }
-.wordmark .wm-a{font-weight:600; color:#064E3B; position:relative; z-index:1; text-shadow:0 0 1px #faf6ee, 0 0 2px #faf6ee, 0 0 3px rgba(250,246,238,.9);}
-.wordmark .wm-b{font-weight:500; color:#064E3B;}
-/* red dot (brand red from the original logo) sits behind the "BEL" letters */
-.wordmark .wm-dot{position:relative; display:inline-block; z-index:0; font-weight:700;
-  text-shadow:0 0 1px #faf6ee, 0 0 2px #faf6ee, 0 0 3px rgba(250,246,238,.9);}
-.wordmark .wm-dot::before{content:''; position:absolute; z-index:-1; left:0; top:50%;
-  width:1.8em; height:1.8em; margin:-.9em 0 0 calc(-.233em + var(--ls) / 2); border-radius:50%; background:#E8382F;}
+.wordmark .wm-a{font-weight:700; color:#064E3B; position:relative; z-index:1;}
+.wordmark .wm-b{font-weight:700; color:#064E3B;}
+.wordmark .wm-dot{font-weight:700;}
 .wordmark::after{                         /* fine gold rule under the name */
   content:''; position:absolute; left:calc(var(--ls) * 1.2); right:calc(var(--ls) * .2); bottom:-9px; height:1px;
   background:linear-gradient(90deg, transparent, #b08d57 18%, #b08d57 82%, transparent);
@@ -923,7 +919,7 @@ footer{border-top:1px solid var(--gold); padding:68px 28px 32px; background:var(
 }
 @media (max-width:640px){
   .nav-inner{padding:8px 16px; min-height:64px;}
-  .wordmark{--ls:.22em; font-size:clamp(15px, 4.9vw, 22px);}
+  .wordmark{--ls:.16em; font-size:clamp(13px, 3.9vw, 17px);}
   .wordmark::after{bottom:-7px;}
   .wordmark-link{padding:4px 0 8px;}
   .preview-bar{font-size:12px; padding:7px 14px;}
