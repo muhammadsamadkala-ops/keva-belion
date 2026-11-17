@@ -175,6 +175,7 @@ public class AdminPhase1AccessTests : IClassFixture<ApiFactory>
     [InlineData("/api/v1/admin/customers")]
     [InlineData("/api/v1/admin/customers/1")]
     [InlineData("/api/v1/admin/dashboard")]
+    [InlineData("/api/v1/admin/categories")]
     public async Task Admin_reads_need_a_token(string url) =>
         Assert.Equal(HttpStatusCode.Unauthorized, (await _client.GetAsync(url)).StatusCode);
 
