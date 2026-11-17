@@ -16,7 +16,8 @@ public sealed class AdminOrdersController(KivaBelionDbContext db) : ControllerBa
 {
     private static AdminOrderDto ToAdminDto(Order o) => new(
         o.PublicId, o.OrderNumber, o.Status.ToString(), OrderService.PaymentStatusText(o), o.IsTestOrder,
-        o.Customer?.FullName ?? o.ShipRecipientName, o.Customer?.Email ?? "", o.ShipPhone,
+        // The name written on THIS order: the customer row keeps only the latest name used with that email.
+        o.ShipRecipientName, o.Customer?.Email ?? "", o.ShipPhone,
         o.ShipLine1, o.ShipCity, o.ShipProvince, o.CustomerNote,
         o.Subtotal, o.ShippingFee, o.Total, o.CreatedAtUtc,
         o.Items.Select(i => new OrderLineDto(i.ProductName, i.Quantity, i.UnitPrice, i.LineTotal)).ToList());
