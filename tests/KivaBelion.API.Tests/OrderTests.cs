@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using KivaBelion.API.Data.Entities;
 using KivaBelion.API.Orders;
 
 namespace KivaBelion.API.Tests;
@@ -132,7 +133,7 @@ public class OrderRequestValidatorTests
     [InlineData("Card")]
     [InlineData("Safepay")]
     [InlineData("BankTransfer")]
-    public void Rejects_any_payment_method_except_cash_on_delivery(string method)
+    public void Rejects_any_payment_method_except_cash_on_delivery_or_advance_payment(string method)
     {
         var r = Valid(); r.PaymentMethod = method;
         Assert.Contains("paymentMethod", OrderRequestValidator.Validate(r).Keys);
@@ -249,4 +250,49 @@ public class OrdersApiTests : IClassFixture<ApiFactory>
         var response = await _client.SendAsync(request);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+}
+
+public class AdvancePaymentTests
+{
+    [Theory]
+    [InlineData("Karachi", PaymentMethod.CashOnDelivery)]
+    [InlineData(" KARACHI ", PaymentMethod.CashOnDelivery)]
+    [InlineData("Karachi City", PaymentMethod.CashOnDelivery)]
+    [InlineData("Lahore", PaymentMethod.AdvancePayment)]
+    [InlineData("Islamabad", PaymentMethod.AdvancePayment)]
+    [InlineData("", PaymentMethod.AdvancePayment)]
+    public void Karachi_pays_cash_and_every_other_city_pays_in_advance(string city, PaymentMethod expected) =>
+        Assert.Equal(expected, OrderPricing.PaymentMethodFor(city, "Karachi"));
+
+    [Theory]
+    [InlineData("AdvancePayment")]
+    [InlineData("CashOnDelivery")]
+    public void Validator_accepts_both_payment_hints(string method)
+    {
+        var r = new CreateOrderRequest
+        {
+            Customer = new CustomerInput { FullName = "Ayesha Khan", Phone = "03001234567", Email = "ayesha@example.com" },
+            Shipping = new ShippingInput { Line1 = "House 12, Street 4, Gulshan", City = "Lahore" },
+            PaymentMethod = method,
+            Items = new List<OrderLineInput> { new() { ProductSlug = "noir", Quantity = 1 } },
+        };
+        Assert.DoesNotContain("paymentMethod", OrderRequestValidator.Validate(r).Keys);
+    }
+
+    private static Order Make(PaymentMethod m, OrderStatus s) => new() { PaymentMethod = m, Status = s };
+
+    [Fact]
+    public void Payment_status_text_follows_the_payment_method()
+    {
+        Assert.Equal("Awaiting advance payment", OrderService.PaymentStatusText(Make(PaymentMethod.AdvancePayment, OrderStatus.Pending)));
+        Assert.Equal("Advance payment received", OrderService.PaymentStatusText(Make(PaymentMethod.AdvancePaid, OrderStatus.Confirmed)));
+        Assert.Equal("Cancelled", OrderService.PaymentStatusText(Make(PaymentMethod.AdvancePayment, OrderStatus.Cancelled)));
+        Assert.Contains("refund", OrderService.PaymentStatusText(Make(PaymentMethod.AdvancePaid, OrderStatus.Cancelled)));
+        Assert.Equal("Unpaid - pay cash on delivery", OrderService.PaymentStatusText(Make(PaymentMethod.CashOnDelivery, OrderStatus.Pending)));
+        Assert.Equal("Paid in cash on delivery", OrderService.PaymentStatusText(Make(PaymentMethod.CashOnDelivery, OrderStatus.Delivered)));
+    }
+
+    [Fact]
+    public void Longest_payment_method_name_fits_the_database_column() =>
+        Assert.All(Enum.GetNames<PaymentMethod>(), n => Assert.True(n.Length <= 20));
 }

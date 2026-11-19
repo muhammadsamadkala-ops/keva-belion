@@ -169,7 +169,7 @@ if(menuToggleEl && navLinks){
   navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click', ()=>navLinks.classList.remove('show')));
 }
 
-// ---------- CHECKOUT (Cash on Delivery) ----------
+// ---------- CHECKOUT (Karachi: Cash on Delivery · other cities: advance payment) ----------
 // The order is sent to the Kiva Belion API, which checks every price and total again on the server and
 // saves the order. The bag is only cleared, and a confirmation only shown, after the server answers that the
 // order was really created. No card or bank details are ever asked for. Nothing personal is stored in the browser.
@@ -186,6 +186,13 @@ function deliveryFeeFor(city){
   let v = String(city||'').trim().toLowerCase().split(/\s+/).filter(Boolean).join(' ');
   if(v.endsWith(' city')) v = v.slice(0,-5).trim();
   return v === DELIVERY_FREE_CITY ? 0 : DELIVERY_FEE_OTHER;
+}
+// Karachi pays cash on delivery; every other city pays in advance. The server decides the real method; this only shows it.
+function isAdvanceCity(city){ return deliveryFeeFor(city) !== 0; }
+function placeButtonLabel(city){
+  const c = String(city||'').trim();
+  if(!c) return 'Place order';
+  return isAdvanceCity(c) ? 'Place order · Advance payment' : 'Place order · Cash on Delivery';
 }
 let checkoutBusy = false;          // true while an order is being sent: blocks double submits
 let checkoutAttempt = null;        // {sig, key}: the same key is reused when the SAME order is retried
@@ -236,7 +243,7 @@ function checkoutFormHTML(){
   return `
     <button type="button" class="modal-close-btn" id="checkoutCloseBtn" aria-label="Close checkout">&times;</button>
     <h2 id="checkoutTitle">Checkout</h2>
-    <div class="sub">Cash on Delivery · pay when your order arrives</div>
+    <div class="sub">Karachi: Cash on Delivery · Other cities: advance payment</div>
     <form id="checkoutForm" novalidate>
       <div class="order-summary" aria-label="Order summary">
         <ul class="cs-list">${rows}</ul>
@@ -256,12 +263,12 @@ function checkoutFormHTML(){
       <div class="field">
         <label>Payment method</label>
         <div class="pay-options">
-          <div class="pay-option active" data-method="cod">Cash on Delivery</div>
+          <div class="pay-option active" id="payOption">Enter your city to see your payment method</div>
         </div>
-        <p class="pay-note">Your order is <strong>unpaid until it is delivered</strong>. Please keep the exact amount in cash ready.</p>
+        <p class="pay-note" id="payNote"><strong>Karachi:</strong> Cash on Delivery, pay when your order arrives. <strong>Other cities:</strong> advance payment. We will contact you to share the payment details.</p>
       </div>
       <div class="checkout-status" id="checkoutStatus" role="alert" aria-live="assertive"></div>
-      <button type="submit" class="btn btn-primary modal-submit" id="placeOrderBtn">Place order · Cash on Delivery</button>
+      <button type="submit" class="btn btn-primary modal-submit" id="placeOrderBtn">Place order</button>
     </form>
   `;
 }
@@ -271,6 +278,20 @@ function updateCheckoutTotals(){
   const city = cityEl.value.trim();
   const d = modalBox.querySelector('#csDelivery'), t = modalBox.querySelector('#csTotal');
   if(!d || !t) return;
+  const po = modalBox.querySelector('#payOption'), pn = modalBox.querySelector('#payNote'), pb = modalBox.querySelector('#placeOrderBtn');
+  if(po && pn){
+    if(!city){
+      po.textContent = 'Enter your city to see your payment method';
+      pn.innerHTML = '<strong>Karachi:</strong> Cash on Delivery, pay when your order arrives. <strong>Other cities:</strong> advance payment. We will contact you to share the payment details.';
+    } else if(isAdvanceCity(city)){
+      po.textContent = 'Advance payment';
+      pn.innerHTML = 'For orders outside Karachi, payment is made <strong>in advance</strong>. After you place your order, <strong>we will contact you to share the payment details</strong>. Your order is shipped once we receive your payment.';
+    } else {
+      po.textContent = 'Cash on Delivery';
+      pn.innerHTML = 'Your order is <strong>unpaid until it is delivered</strong>. Please keep the exact amount in cash ready.';
+    }
+  }
+  if(pb && !checkoutBusy) pb.textContent = placeButtonLabel(city);
   if(!city){ d.textContent = 'Free in Karachi · PKR ' + DELIVERY_FEE_OTHER.toLocaleString() + ' for other cities'; t.textContent = 'PKR ' + cartTotal().toLocaleString(); return; }
   const fee = deliveryFeeFor(city);
   d.textContent = fee === 0 ? 'Free' : 'PKR ' + fee.toLocaleString();
@@ -297,7 +318,7 @@ function showFieldErrors(errors){
 function setCheckoutBusy(busy){
   checkoutBusy = busy;
   const btn = modalBox.querySelector('#placeOrderBtn');
-  if(btn){ btn.disabled = busy; btn.textContent = busy ? 'Placing your order…' : 'Place order · Cash on Delivery'; }
+  if(btn){ btn.disabled = busy; btn.textContent = busy ? 'Placing your order…' : placeButtonLabel((modalBox.querySelector('#fcity')||{}).value); }
   const form = modalBox.querySelector('#checkoutForm'); if(form) form.setAttribute('aria-busy', busy ? 'true' : 'false');
 }
 // A response only counts as "order saved" when it has the shape of a real order from the server.
@@ -322,7 +343,9 @@ function showOrderConfirmation(order, city){
         ${fee}
         <div class="cs-total"><span>Total</span><strong>PKR ${Number(order.total).toLocaleString()}</strong></div>
       </div>
-      <p><strong>Cash on Delivery</strong> — unpaid until delivery. Please keep <strong>PKR ${Number(order.total).toLocaleString()}</strong> in cash ready.</p>
+      ${order.paymentMethod === 'AdvancePayment'
+        ? `<p><strong>Advance payment</strong> — <strong>PKR ${Number(order.total).toLocaleString()}</strong> is due before your order is shipped. <strong>We will contact you shortly on your phone / WhatsApp to share the payment details.</strong> Your order is shipped once we receive your payment.</p>`
+        : `<p><strong>Cash on Delivery</strong> — unpaid until delivery. Please keep <strong>PKR ${Number(order.total).toLocaleString()}</strong> in cash ready.</p>`}
       <p style="margin-top:8px;">Please save your order reference in case you need to contact us.</p>
       <div><button class="btn btn-primary" style="margin-top:16px;" id="closeConfirm">Continue shopping</button></div>
     </div>
@@ -360,7 +383,7 @@ async function submitOrder(){
     customer: {fullName: v.name, phone: v.phone, email: v.email},
     shipping: {line1: v.address, city: v.city},
     note: v.gift ? ('Gift order' + (v.giftMessage ? ' — message: ' + v.giftMessage : '')) : null,
-    paymentMethod: 'CashOnDelivery',
+    paymentMethod: isAdvanceCity(v.city) ? 'AdvancePayment' : 'CashOnDelivery',
     expectedTotal: cartTotal() + deliveryFeeFor(v.city),
     items: cart.map(i => ({productSlug: i.id, quantity: i.qty})),
   };

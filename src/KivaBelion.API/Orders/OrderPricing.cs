@@ -1,3 +1,5 @@
+using KivaBelion.API.Data.Entities;
+
 namespace KivaBelion.API.Orders;
 
 /// <summary>The only place where order money is calculated.</summary>
@@ -13,6 +15,10 @@ public static class OrderPricing
     {
         return Normalize(city) == Normalize(freeCity) ? 0m : feeElsewhere;
     }
+
+    /// <summary>Karachi pays cash on delivery; every other city pays in advance.</summary>
+    public static PaymentMethod PaymentMethodFor(string? city, string freeCity) =>
+        Normalize(city) == Normalize(freeCity) ? PaymentMethod.CashOnDelivery : PaymentMethod.AdvancePayment;
 
     private static string Normalize(string? value)
     {

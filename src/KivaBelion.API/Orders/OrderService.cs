@@ -43,11 +43,18 @@ public sealed class OrderService(KivaBelionDbContext db, IConfiguration config, 
         o.CreatedAtUtc,
         o.IsTestOrder);
 
-    /// <summary>Cash on Delivery orders are unpaid until the cash is handed over.</summary>
-    public static string PaymentStatusText(Order o) =>
-        o.Status == OrderStatus.Delivered ? "Paid in cash on delivery"
-        : o.Status == OrderStatus.Cancelled ? "Cancelled"
-        : "Unpaid - pay cash on delivery";
+    /// <summary>
+    /// Cash on Delivery orders are unpaid until the cash is handed over.
+    /// Advance-payment orders are unpaid until the admin marks the payment as received.
+    /// </summary>
+    public static string PaymentStatusText(Order o) => o.PaymentMethod switch
+    {
+        PaymentMethod.AdvancePayment => o.Status == OrderStatus.Cancelled ? "Cancelled" : "Awaiting advance payment",
+        PaymentMethod.AdvancePaid => o.Status == OrderStatus.Cancelled ? "Cancelled - payment was received, refund needed" : "Advance payment received",
+        _ => o.Status == OrderStatus.Delivered ? "Paid in cash on delivery"
+            : o.Status == OrderStatus.Cancelled ? "Cancelled"
+            : "Unpaid - pay cash on delivery",
+    };
 
     public async Task<PlaceOrderResult> PlaceAsync(CreateOrderRequest request, string? idempotencyKey, CancellationToken ct)
     {
@@ -147,7 +154,8 @@ public sealed class OrderService(KivaBelionDbContext db, IConfiguration config, 
             IdempotencyKey = string.IsNullOrEmpty(idempotencyKey) ? null : idempotencyKey,
             Customer = customer,
             Status = OrderStatus.Pending,
-            PaymentMethod = PaymentMethod.CashOnDelivery,
+            // decided here from the city, never from what the browser says
+            PaymentMethod = OrderPricing.PaymentMethodFor(request.Shipping!.City, config.GetValue("Orders:FreeDeliveryCity", "Karachi") ?? "Karachi"),
             IsTestOrder = config.GetValue("Features:TestMode", true),
             CurrencyCode = "PKR",
             Subtotal = totals.Subtotal,

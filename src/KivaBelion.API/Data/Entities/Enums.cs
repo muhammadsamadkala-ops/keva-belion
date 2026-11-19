@@ -14,7 +14,14 @@ public enum OrderStatus
 /// <summary>Only cash on delivery exists for now. Online payments are a later phase.</summary>
 public enum PaymentMethod
 {
-    CashOnDelivery = 0
+    /// <summary>Karachi: pay cash when the order arrives.</summary>
+    CashOnDelivery = 0,
+
+    /// <summary>Other cities: the customer pays in advance. We share payment details by phone/WhatsApp. Payment not received yet.</summary>
+    AdvancePayment = 1,
+
+    /// <summary>Advance payment received (marked by the admin). Kept short because the database column holds 20 characters.</summary>
+    AdvancePaid = 2
 }
 
 /// <summary>Roles for staff accounts. Admin can change the catalogue; Staff is read-only for now.</summary>

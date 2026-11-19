@@ -66,9 +66,11 @@ public static class OrderRequestValidator
             Add("note", "The note can be at most 500 characters.");
 
         // ----- payment -----
+        // The browser may say CashOnDelivery or AdvancePayment, but the server decides from the city (Karachi = cash, others = advance).
         if (!string.IsNullOrWhiteSpace(request.PaymentMethod)
-            && !string.Equals(request.PaymentMethod.Trim(), "CashOnDelivery", StringComparison.OrdinalIgnoreCase))
-            Add("paymentMethod", "Only Cash on Delivery is available.");
+            && !string.Equals(request.PaymentMethod.Trim(), "CashOnDelivery", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(request.PaymentMethod.Trim(), "AdvancePayment", StringComparison.OrdinalIgnoreCase))
+            Add("paymentMethod", "Only Cash on Delivery (Karachi) and Advance Payment (other cities) are available.");
 
         if (request.ExpectedTotal.HasValue && request.ExpectedTotal.Value < 0)
             Add("expectedTotal", "Invalid total.");

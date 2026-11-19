@@ -15,7 +15,7 @@ namespace KivaBelion.API.Controllers;
 public sealed class AdminOrdersController(KivaBelionDbContext db) : ControllerBase
 {
     private static AdminOrderDto ToAdminDto(Order o) => new(
-        o.PublicId, o.OrderNumber, o.Status.ToString(), OrderService.PaymentStatusText(o), o.IsTestOrder,
+        o.PublicId, o.OrderNumber, o.Status.ToString(), OrderService.PaymentStatusText(o), o.PaymentMethod.ToString(), o.IsTestOrder,
         // The name written on THIS order: the customer row keeps only the latest name used with that email.
         o.ShipRecipientName, o.Customer?.Email ?? "", o.ShipPhone,
         o.ShipLine1, o.ShipCity, o.ShipProvince, o.CustomerNote,
@@ -70,6 +70,10 @@ public sealed class AdminOrdersController(KivaBelionDbContext db) : ControllerBa
         if (order.Status is OrderStatus.Delivered or OrderStatus.Cancelled)
             return Conflict(new ProblemDetails { Status = 409, Title = $"A {order.Status} order cannot be changed." });
 
+        // Advance-payment orders cannot move forward until the payment is marked as received (they can still be cancelled).
+        if (order.PaymentMethod == PaymentMethod.AdvancePayment && next != OrderStatus.Cancelled)
+            return Conflict(new ProblemDetails { Status = 409, Title = "Payment has not been received yet. Press \"Payment received\" first." });
+
         if (!OrderStatusRules.CanMove(order.Status, next))
             return Conflict(new ProblemDetails { Status = 409, Title = $"An order that is {order.Status} cannot be moved to {next}." });
 
@@ -85,10 +89,31 @@ public sealed class AdminOrdersController(KivaBelionDbContext db) : ControllerBa
         await db.SaveChangesAsync(cancellationToken);
         return Ok(ToAdminDto(order));
     }
+
+    /// <summary>Marks the advance payment of an order as received. Admin only. Only for advance-payment orders that are still open.</summary>
+    [HttpPost("{publicId:guid}/payment-received")]
+    [Authorize(Policy = AuthorizationPolicies.AdminOnly)]
+    public async Task<IActionResult> MarkPaymentReceived(Guid publicId, CancellationToken cancellationToken)
+    {
+        var order = await db.Orders.Include(o => o.Customer).Include(o => o.Items)
+            .FirstOrDefaultAsync(o => o.PublicId == publicId, cancellationToken);
+        if (order is null) return NotFound();
+
+        if (order.Status is OrderStatus.Delivered or OrderStatus.Cancelled)
+            return Conflict(new ProblemDetails { Status = 409, Title = $"A {order.Status} order cannot be changed." });
+        if (order.PaymentMethod == PaymentMethod.AdvancePaid)
+            return Conflict(new ProblemDetails { Status = 409, Title = "Payment was already marked as received." });
+        if (order.PaymentMethod != PaymentMethod.AdvancePayment)
+            return Conflict(new ProblemDetails { Status = 409, Title = "This is a Cash on Delivery order. No advance payment is expected." });
+
+        order.PaymentMethod = PaymentMethod.AdvancePaid;
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(ToAdminDto(order));
+    }
 }
 
 public sealed record AdminOrderDto(
-    Guid PublicId, string OrderNumber, string Status, string PaymentStatus, bool IsTestOrder,
+    Guid PublicId, string OrderNumber, string Status, string PaymentStatus, string PaymentMethod, bool IsTestOrder,
     string CustomerName, string CustomerEmail, string Phone,
     string AddressLine, string City, string? Province, string? Note,
     decimal Subtotal, decimal ShippingFee, decimal Total, DateTimeOffset CreatedAtUtc,
