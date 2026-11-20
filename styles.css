@@ -191,7 +191,7 @@ a.mega-link:hover::before, a.mega-link:focus-visible::before{opacity:1; transfor
 .mega-card-img{display:block; aspect-ratio:5/6; overflow:hidden; background:#241f1b;}
 .mega-card-img img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .8s var(--ease);}
 .mega-card-name{font:400 1.05rem/1.2 var(--serif); padding:13px 14px 3px;}
-.mega-card-notes{font:500 11px/1.4 var(--sans); letter-spacing:.05em; color:var(--m-muted); padding:0 14px 14px; flex:1;}
+.mega-card-notes{font:500 12px/1.4 var(--sans); letter-spacing:.05em; color:var(--m-muted); padding:0 14px 14px; flex:1;}
 .mega-card:hover, .mega-card:focus-visible{transform:translateY(-4px); border-color:rgba(201,166,107,.6); background:rgba(250,246,238,.09); box-shadow:0 18px 30px -16px rgba(0,0,0,.6);}
 .mega-card:hover .mega-card-img img, .mega-card:focus-visible .mega-card-img img{transform:scale(1.05);}
 .mega-foot{
@@ -205,16 +205,16 @@ a.mega-link:hover::before, a.mega-link:focus-visible::before{opacity:1; transfor
   background:linear-gradient(120deg, rgba(201,166,107,.16), rgba(201,166,107,.04) 60%, rgba(250,246,238,.03));
 }
 .mega-promo p{margin:0;}
-.mega-promo-eyebrow{font:600 10.5px/1 var(--sans); letter-spacing:.2em; text-transform:uppercase; color:var(--m-gold); margin-bottom:8px !important;}
+.mega-promo-eyebrow{font:600 12px/1 var(--sans); letter-spacing:.2em; text-transform:uppercase; color:var(--m-gold); margin-bottom:8px !important;}
 .mega-promo-title{font:400 1.3rem/1.15 var(--serif); margin-bottom:5px !important;}
 .mega-promo-copy{font:500 12.5px/1.5 var(--sans); color:var(--m-muted); max-width:34ch;}
 .mega-promo-cta{
-  flex:none; font:600 11.5px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; white-space:nowrap;
+  flex:none; font:600 12px/1 var(--sans); letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; display:inline-flex; align-items:center; min-height:44px;
   color:#14110f; background:var(--m-gold); padding:14px 20px; border-radius:999px;
   transition:background .3s var(--ease), transform .4s var(--ease);
 }
 .mega-promo-cta:hover, .mega-promo-cta:focus-visible{background:#e0c28a; transform:translateY(-1px);}
-.mega-foot a{color:var(--m-gold); font-weight:600; letter-spacing:.04em;}
+.mega-foot a{color:var(--m-gold); font-weight:600; letter-spacing:.04em; display:inline-flex; align-items:center; min-height:44px;}
 .mega-foot a:hover{text-decoration:underline; text-underline-offset:4px;}
 
 /* staggered entrance of the content (menu open and menu switch) */
@@ -394,7 +394,7 @@ button[disabled], .btn[disabled]{cursor:not-allowed;}
 .product-card h3{font-weight:400; font-size:1.4rem; line-height:1.2; margin-bottom:6px;}
 .product-card .notes{color:var(--text-muted); font-size:13.5px; letter-spacing:.02em;}
 .product-card .size-tag{
-  display:block; margin-top:10px; font-size:11px; font-weight:700; letter-spacing:.14em;
+  display:block; margin-top:10px; font-size:12px; font-weight:700; letter-spacing:.14em;
   color:var(--gold-bright);
 }
 .product-card .card-desc{color:var(--text-muted); font-size:14px; line-height:1.6; margin-top:10px; max-width:34ch; min-height:3.2em;}
@@ -840,7 +840,7 @@ footer{border-top:1px solid var(--gold); padding:68px 28px 32px; background:var(
   .hero-inner{grid-template-columns:1fr; gap:6px;}
   .hero-visual{order:-1; width:min(44vw,184px); margin-bottom:-4px;}
   .hero-content{max-width:none;}
-  .eyebrow-pill{justify-content:center; letter-spacing:.15em; font-size:10.5px; gap:10px;}
+  .eyebrow-pill{justify-content:center; letter-spacing:.15em; font-size:12px; gap:10px;}
   .eyebrow-pill::before{display:none;}
   .hero h1{font-size:clamp(2.05rem,9.4vw,2.6rem);}
   .hero p.lede{margin-left:auto; margin-right:auto;}
@@ -912,7 +912,7 @@ footer{border-top:1px solid var(--gold); padding:68px 28px 32px; background:var(
   .nav-acc a.mega-link:hover{transform:none;}
   .nav-acc .mega-cards{gap:10px;}
   .nav-acc .mega-card-name{font-size:.95rem; padding:10px 10px 2px;}
-  .nav-acc .mega-card-notes{font-size:10.5px; padding:0 10px 10px;}
+  .nav-acc .mega-card-notes{font-size:12px; padding:0 10px 10px;}
   .nav-acc .mega-foot{padding-top:12px; font-size:12.5px; flex-direction:row; flex-wrap:wrap; gap:6px;}
   .nav-acc .mega-link small{font-size:9.5px;}
   .nav-acc .mega-card:hover{transform:none; box-shadow:none;}

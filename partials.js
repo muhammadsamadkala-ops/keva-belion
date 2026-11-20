@@ -15,10 +15,10 @@ const SHOW_INSPIRED = false;
 // notes for each scent have been entered in PYRAMIDS (data.js). Set to true only after that.
 const SHOW_FRAGRANCE_PYRAMID = false;
 
-// ORDERING: the website sends Cash on Delivery orders to this API, which saves them in the database.
+// ORDERING: the website sends orders to this API, which saves them in the database (Karachi = Cash on Delivery, other cities = advance payment).
 // Leave empty ('') to switch checkout off: the form then says ordering is unavailable and nothing is sent.
 const ORDERS_API_BASE = 'https://kivabelion-api.runasp.net';
-// Placing an order never needs a payment card or bank details. Cash on Delivery is the only method.
+// Placing an order never asks for a payment card or bank details on the website. For other cities we share payment details by phone/WhatsApp.
 const SUBSCRIBE_ENDPOINT = 'https://formsubmit.co/ajax/' + SUBSCRIBE_EMAIL;
 
 const SOCIAL = {
@@ -175,7 +175,7 @@ function injectFooterAndModals(){
       <span class="logo-chip"><img src="assets/logo-200.png" alt="Kiva Belion" width="500" height="450" onerror="this.outerHTML='<span class=&quot;logo-text&quot;>KIVA BELION</span>'"></span>
       <p>Eau de parfums made by us in Karachi, Pakistan.</p>
       <div class="socials socials-brand">${socialLinksHTML()}</div>
-      <div class="payment-note"><span class="dot"></span> Cash on Delivery &amp; WhatsApp orders</div>
+      <div class="payment-note"><span class="dot"></span> Cash on Delivery in Karachi · WhatsApp orders</div>
     </div>
     <div>
       <h3>Shop</h3>
